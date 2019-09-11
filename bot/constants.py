@@ -1,6 +1,20 @@
 from dataclasses import dataclass
 
 PREFIX = ';'
+NEWLINES_LIMIT = 10
+CHARACTERS_LIMIT = 300
+
+JUDGE0_TEAM = [365859941292048384, 512551605321596928]
+
+
+@dataclass
+class Emoji:
+    total = '<:total:620744869429641236>'
+    available = '<:available:620705066604560405>'
+    idle = '<:idle:620702759414661120>'
+    working = '<:working:620704067672342528>'
+    paused = '<:paused:620704067479666688>'
+    failed = '<:failed:620704067525672980>'
 
 @dataclass
 class Lang:

@@ -15,7 +15,7 @@ from discord import Embed, Color
 
 
 from typing import Optional
-from bot.constants import Lang
+from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji
 
 
 class Execution(commands.Cog):
@@ -41,30 +41,43 @@ class Execution(commands.Cog):
             code = "\n".join(code.split("\n")[1:])
         return code
 
-    async def __post_hastebin(self, content):
+    async def __post_pastebin(self, content):
         """
-        Posts output to hastebin/documents if it is too large.
+        Posts output to pastebin if it is too large.
+        https://pb.judge0.com/
         
-        Posts to hastebin if the output(stdout, stderr, compile output)
+        Posts to pastebin if the output(stdout, stderr, compile output)
         is more than 1000 characters long.  
         """
-        base_url = "https://hastebin.com/documents"
+        filename = "judge0-ide.json"    
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        base_url = "https://pb.judge0.com/"
+        ide_url = "https://ide.judge0.com/?"
+
+        data = {"content": content, "filename": filename}
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                base_url, data=content.encode("utf-8")
+                base_url, data=data, headers=headers
             ) as resp:
                 if resp.status != 200:
                     return f"{resp.status} {responses[resp.status]}"
+                resp_text = await resp.text()
+                for param in resp_text.split('\n'):
+                    if param.startswith('url: '):
+                        link = param.strip('url: ')
+                        return link.replace(base_url, ide_url).strip('.json')
                 return f"{resp}/{(await resp.json())['key']}"
 
     async def __create_output_embed(
         self,
+        source_code: str,
         stdout: str,
         stderr: str,
         compile_output: str,
         time: float,
         memory: int,
         language: str,
+        language_id: int,
         language_icon: str,
         description: str,
         author_name: str,
@@ -84,7 +97,7 @@ class Execution(commands.Cog):
         """
         color = Color.green() if description == "Accepted" else Color.red()
 
-        embed = Embed(colour=color, timestamp=datetime.now())
+        embed = Embed(colour=color, timestamp=datetime.utcnow())
         embed.set_author(name=f"{author_name}'s code execution", icon_url=author_icon)
 
         output = str()
@@ -97,16 +110,27 @@ class Execution(commands.Cog):
         if not output:
             output = "No output"
 
-        if len(output) > 1000:
-            hastebin_post = await self.__post_hastebin(output)
+        print(len(output))
+        print(output.count('\n'))
 
-            if hastebin_post.startswith("http"):
-                embed.description = f"Output too large - [Full output]({hastebin_post})"
+        if len(output) > 300 or output.count('\n') > 10:
+            content = json.dumps({"source_code": source_code,
+                       "language_id": language_id,
+                       "stdout": stdout,
+                       "stderr": stderr,
+                       "compile_output": compile_output})
+            pb_post = await self.__post_pastebin(content)
+            if pb_post.startswith("http"):
+                embed.description = f"Output too large - [Full output]({pb_post})"
             else:
                 embed.description = (
-                    f"Output too large - Full output is unavaible due {hastebin_post}"
+                    f"Output too large - Full output is unavaible due {pb_post}"
                 )
-            output = "(...)\n" + output[-1000:]
+
+            if output.count('\n') > 10:
+                output =  '\n'.join(output.split('\n')[:10]) + "\n(...)"
+            else:
+                output =  output[:300] + "\n(...)"
 
         embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
 
@@ -133,6 +157,8 @@ class Execution(commands.Cog):
                 res = await r.json()
             token = res["token"]
 
+            print(token)
+
             while True:
                 submission = await cs.get(f"{base_url}{token}?base64_encoded=true")
                 if submission.status not in [200, 201]:
@@ -141,6 +167,8 @@ class Execution(commands.Cog):
                 adict = await submission.json()
                 if adict["status"]["id"] not in [1, 2]:
                     break
+        print(adict)
+        adict.update(payload)
         return adict
 
     async def __execute_code(self, ctx, lang: int, code: str):
@@ -169,12 +197,14 @@ class Execution(commands.Cog):
 
         await ctx.send(
             embed=await self.__create_output_embed(
+                source_code=submission["source_code"],
                 stdout=submission["stdout"],
                 stderr=submission["stderr"],
                 compile_output=submission["compile_output"],
                 time=submission["time"],
                 memory=submission["memory"],
                 language=lang.version,
+                language_id=submission["language_id"],
                 language_icon=lang.icon,
                 description=submission["status"]["description"],
                 author_name=str(ctx.message.author),

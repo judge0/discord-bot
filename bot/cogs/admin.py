@@ -2,7 +2,13 @@ import discord
 from discord import Embed
 from discord.ext import commands
 
-from bot.constants import PREFIX
+from bot.constants import PREFIX, JUDGE0_TEAM
+
+def is_team_member():
+    async def predicate(ctx):
+        return ctx.author.id in JUDGE0_TEAM
+    return commands.check(predicate)
+
 
 class Admin(commands.Cog):
     def __init__(self, bot):
@@ -18,21 +24,21 @@ class Admin(commands.Cog):
             status=eval(f"discord.Status.{self.status_str}"),
         )
 
-    @commands.is_owner()
+    @is_team_member()
     @commands.command(aliases=["q"])
     async def quit(self, ctx):
         """Shuts down the bot."""
         await ctx.send("Terminates.")
         await self.bot.logout()
 
-    @commands.is_owner()
+    @is_team_member()
     @commands.command(aliases=["r"])
     async def reload(self, ctx, arg):
         """Reloads extension."""
-        self.bot.reload_extension(f"app.cogs.{arg}")
-        await ctx.send(f"app.cogs.{arg} reloaded.")
+        self.bot.reload_extension(f"bot.cogs.{arg}")
+        await ctx.send(f"bot.cogs.{arg} reloaded.")
 
-    @commands.is_owner()
+    @is_team_member()
     @commands.command(aliases=["a"])
     async def activity(self, ctx, *, arg):
         """Changes the bot activity"""
@@ -42,7 +48,7 @@ class Admin(commands.Cog):
             status=eval(f"discord.Status.{self.status_str}"),
         )
 
-    @commands.is_owner()
+    @is_team_member()
     @commands.command(aliases=["s"])
     async def status(self, ctx, arg):
         """Changing the bot status."""
