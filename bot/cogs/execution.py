@@ -211,7 +211,7 @@ class Execution(commands.Cog):
                 author_icon=ctx.message.author.avatar_url,
             )
         )
-
+    
     @commands.command(name="bash")
     async def execute_bash(self, ctx, *, code: str):
         """Executes Bash code; -v to check version."""

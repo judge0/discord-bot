@@ -57,5 +57,11 @@ class Admin(commands.Cog):
             activity=discord.Game(self.activity_str), status=eval(f"discord.Status.{self.status_str}")
         )
 
+    @is_team_member()
+    @commands.command()
+    async def emoji(self, ctx, arg: discord.Emoji):
+        """Returns the emoji ID."""
+        await ctx.send(arg.id)
+
 def setup(bot):
     bot.add_cog(Admin(bot))

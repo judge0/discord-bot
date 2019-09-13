@@ -6,7 +6,7 @@ import discord
 from discord.ext import commands
 from discord import Embed, Color
 
-from bot.paginator import Page, Paginator
+from bot.paginator import Paginator
 
 from typing import Optional
 from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji
@@ -31,7 +31,7 @@ class Information(commands.Cog):
                     return
 
                 data = (await r.json())[0]
-        embed = Embed(colour=Color.green(), timestamp=dt.utcnow(), title='Workers Health Check')
+        embed = Embed(colour=Color.from_rgb(255, 255, 255), timestamp=dt.utcnow(), title='Workers Health Check')
 
         embed.set_author(name=f'{ctx.author} request',
                          icon_url=ctx.author.avatar_url)
@@ -57,13 +57,23 @@ class Information(commands.Cog):
                     return
                 data = (await r.json())
 
-        embed = Embed(colour=Color.green(), timestamp=dt.utcnow(), title='System Info')
-        embed.set_author(name=f'{ctx.author} request',
-                         icon_url=ctx.author.avatar_url)
-        
-        for k, v in data.items():
-            embed.add_field(name=k, value=v)
-        await ctx.send(embed=embed)
+
+        alist = [list(data)[x:x+5] for x in range(0, len(data),5)]
+        pages = list()
+
+        for item in alist:
+            embed = Embed(colour=Color.from_rgb(255, 255, 255),
+                          timestamp=dt.utcnow(),
+                          title='System Info')
+            embed.set_author(name=f'{ctx.author} request',
+                            icon_url=ctx.author.avatar_url)
+            
+            for k in item:
+                embed.add_field(name=k, value=data[k], inline=False)
+            pages.append(embed)
+    
+        paginator = Paginator(self.bot, ctx, pages, 30)
+        await paginator.run()
 
     @commands.command()
     async def languages(self, ctx):
@@ -78,25 +88,20 @@ class Information(commands.Cog):
                 data = (await r.json())
 
         alist = [data[x:x+10] for x in range(0, len(data),10)]
-        description = '\n'.join(f'**{i["id"]}.** {i["name"]}' for i in data)
-        embed = Embed(colour=Color.green(),
-                      timestamp=dt.utcnow(),
-                      title='Languages List',
-                      description=description)
-        embed.set_author(name=f'{ctx.author} request',
-                         icon_url=ctx.author.avatar_url)
-        await ctx.send(embed=embed)
+        pages = list()
 
-    @commands.command()
-    async def test(self, ctx):
-        page = [Page(author=ctx.author, title='Test1'),
-                Page(author=ctx.author, title='Test2'),
-                Page(author=ctx.author, title='Test3'),
-                Page(author=ctx.author, title='Test4'),
-                Page(author=ctx.author, title='Test5'),
-                Page(author=ctx.author, title='Test6')]
-        paginator = Paginator(self.bot, message=ctx.message, page_list=page)
-        await paginator.paginate()
+        for item in alist:
+            description = '\n'.join(f'**{i["id"]}.** {i["name"]}' for i in item)
+            embed = Embed(colour=Color.from_rgb(255, 255, 255),
+                        timestamp=dt.utcnow(),
+                        title='Languages List',
+                        description=description)
+            embed.set_author(name=f'{ctx.author} request',
+                            icon_url=ctx.author.avatar_url)
+            pages.append(embed)
+
+        paginator = Paginator(self.bot, ctx, pages, 30)
+        await paginator.run()
 
 def setup(bot):
     bot.add_cog(Information(bot))
