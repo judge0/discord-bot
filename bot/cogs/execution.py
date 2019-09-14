@@ -15,7 +15,7 @@ from discord import Embed, Color
 
 
 from typing import Optional
-from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji
+from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
 
 
 class Execution(commands.Cog):
@@ -26,7 +26,7 @@ class Execution(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def __strip_source_code(self, code: str) -> str:
+    def __strip_source_code(self, code: Optional[str]) -> str:
         """
         Strips the source code from a Discord message.
         
@@ -70,7 +70,7 @@ class Execution(commands.Cog):
 
     async def __create_output_embed(
         self,
-        source_code: str,
+        source_code: Optional[str],
         stdout: str,
         stderr: str,
         compile_output: str,
@@ -142,7 +142,27 @@ class Execution(commands.Cog):
 
         return embed
 
-    async def __get_submission(self, source_code: str, language_id: int) -> dict:
+    def __create_how_to_pass_embed(self, lang):
+        embed = Embed(title="How to pass source code?")
+        embed.add_field(name='Method 1 (Plain)',
+                    value=(f"{PREFIX}{lang.command}\n"
+                            "code"),
+                    inline=False
+        )
+        embed.add_field(name='Method 2 (Code block)',
+                    value=(f"{PREFIX}{lang.command}\n"
+                            "\`\`\`code\`\`\`"),
+                    inline=False
+        )
+        embed.add_field(name='Method 3 (Syntax Highlighting)',
+                        value=(f"{PREFIX}{lang.command}\n"
+                            f"\`\`\`{lang.command}\n"
+                            "code\`\`\`"),
+                    inline=False
+        )
+        return embed
+
+    async def __get_submission(self, source_code: Optional[str], language_id: int) -> dict:
         """
         Sends submission in judge0 API and waits for output.
         """
@@ -171,7 +191,7 @@ class Execution(commands.Cog):
         adict.update(payload)
         return adict
 
-    async def __execute_code(self, ctx, lang: int, code: str):
+    async def __execute_code(self, ctx, lang, code: Optional[str]):
         """
         The main method for executing source code from a message.
 
@@ -184,8 +204,12 @@ class Execution(commands.Cog):
             if is error it sends the error
             otherwise it creates an embed for the output and sends it in the same chat
         """
+        if code == None:
+            await ctx.send(embed=self.__create_how_to_pass_embed(lang))
+            return
+
         if code.startswith("-v") or code.startswith("-version"):
-            await ctx.send(lang.version)
+            await ctx.send(f"> {lang.version}")
             return
 
         code = self.__strip_source_code(code)
@@ -212,78 +236,78 @@ class Execution(commands.Cog):
             )
         )
     
-    @commands.command(name="bash")
-    async def execute_bash(self, ctx, *, code: str):
+    @commands.command(name=Lang.Bash.command)
+    async def execute_bash(self, ctx, *, code: Optional[str]):
         """Executes Bash code; -v to check version."""
         await self.__execute_code(ctx, Lang.Bash, code)
 
-    @commands.command(name="c")
-    async def execute_c(self, ctx, *, code: str):
+    @commands.command(name=Lang.C.command)
+    async def execute_c(self, ctx, *, code: Optional[str]):
         """Executes C code; -v to check version."""
         await self.__execute_code(ctx, Lang.C, code)
 
-    @commands.command(name="cpp", aliases=['c++'])
-    async def execute_cpp(self, ctx, *, code: str):
+    @commands.command(name=Lang.Cpp.command, aliases=['c++'])
+    async def execute_cpp(self, ctx, *, code: Optional[str]):
         """Executes C++ code; -v to check version."""
         await self.__execute_code(ctx, Lang.Cpp, code)
 
-    @commands.command(name="csharp", aliases=['c#'])
-    async def execute_csharp(self, ctx, *, code: str):
+    @commands.command(name=Lang.CSharp.command, aliases=['c#'])
+    async def execute_csharp(self, ctx, *, code: Optional[str]):
         """Executes C# code; -v to check version."""
         await self.__execute_code(ctx, Lang.CSharp, code)
 
-    @commands.command(name="clojure")
-    async def execute_clojure(self, ctx, *, code: str):
+    @commands.command(name=Lang.Clojure.command)
+    async def execute_clojure(self, ctx, *, code: Optional[str]):
         """Executes Clojure code; -v to check version."""
         await self.__execute_code(ctx, Lang.Clojure, code)
 
-    @commands.command(name="crystal")
-    async def execute_crystal(self, ctx, *, code: str):
+    @commands.command(name=Lang.Crystal.command)
+    async def execute_crystal(self, ctx, *, code: Optional[str]):
         """Executes Crystal code; -v to check version."""
         await self.__execute_code(ctx, Lang.Crystal, code)
 
-    @commands.command(name="elixir")
-    async def execute_elixir(self, ctx, *, code: str):
+    @commands.command(name=Lang.Elixir.command)
+    async def execute_elixir(self, ctx, *, code: Optional[str]):
         """Executes Elixir code; -v to check version."""
         await self.__execute_code(ctx, Lang.Elixir, code)
 
-    @commands.command(name="erlang")
-    async def execute_erlang(self, ctx, *, code: str):
+    @commands.command(name=Lang.Erlang.command)
+    async def execute_erlang(self, ctx, *, code: Optional[str]):
         """Executes Erlang code; -v to check version."""
         await self.__execute_code(ctx, Lang.Erlang, code)
 
-    @commands.command(name="go", aliases=['golang'])
-    async def execute_go(self, ctx, *, code: str):
+    @commands.command(name=Lang.Go.command, aliases=['golang'])
+    async def execute_go(self, ctx, *, code: Optional[str]):
         """Executes Golang code; -v to check version."""
         await self.__execute_code(ctx, Lang.Go, code)
 
-    @commands.command(name="haskell")
-    async def execute_haskell(self, ctx, *, code: str):
+    @commands.command(name=Lang.Haskell.command)
+    async def execute_haskell(self, ctx, *, code: Optional[str]):
         """Executes Haskell code; -v to check version."""
         await self.__execute_code(ctx, Lang.Haskell, code)
 
-    @commands.command(name="java")
-    async def execute_java(self, ctx, *, code: str):
+    @commands.command(name=Lang.Java.command)
+    async def execute_java(self, ctx, *, code: Optional[str]):
         """Executes Java code; -v to check version."""
         await self.__execute_code(ctx, Lang.Java, code)
 
-    @commands.command(name="javascript", aliases=['js'])
-    async def execute_js(self, ctx, *, code: str):
+    @commands.command(name=Lang.JavaScript.command, aliases=['js'])
+    async def execute_js(self, ctx, *, code: Optional[str]):
         """Executes JavaScript code; -v to check version."""
         await self.__execute_code(ctx, Lang.JavaScript, code)
 
-    @commands.command(name="python", aliases=['py'])
-    async def execute_python(self, ctx, *, code: str):
+    @commands.command(name=Lang.Python.command, aliases=['py'])
+    async def execute_python(self, ctx, *, code: Optional[str]):
         """Executes Python code; -v to check version."""
         await self.__execute_code(ctx, Lang.Python, code)
 
-    @commands.command(name="ruby")
-    async def execute_ruby(self, ctx, *, code: str):
+    @commands.command(name=Lang.Ruby.command)
+    async def execute_ruby(self, ctx, *, code: Optional[str]):
         """Executes Ruby code; -v to check version."""
         await self.__execute_code(ctx, Lang.Ruby, code)
 
-    @commands.command(name="rust")
-    async def execute_rust(self, ctx, *, code: str):
+    @commands.command(name=Lang.Rust.command)
+    async def execute_rust(self, ctx, *, code: Optional[str]):
         """Executes Rust code; -v to check version."""
         await self.__execute_code(ctx, Lang.Rust, code)
 
