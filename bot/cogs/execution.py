@@ -41,35 +41,36 @@ class Execution(commands.Cog):
             code = "\n".join(code.split("\n")[1:])
         return code
 
-    async def __post_pastebin(self, content):
-        """
-        Posts output to pastebin if it is too large.
-        https://pb.judge0.com/
+    # async def __post_pastebin(self, content):
+    #     """
+    #     Posts output to pastebin if it is too large.
+    #     https://pb.judge0.com/
         
-        Posts to pastebin if the output(stdout, stderr, compile output)
-        is more than 1000 characters long.  
-        """
-        filename = "judge0-ide.json"    
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-        base_url = "https://pb.judge0.com/"
-        ide_url = "https://ide.judge0.com/?"
+    #     Posts to pastebin if the output(stdout, stderr, compile output)
+    #     is more than 1000 characters long.  
+    #     """
+    #     filename = "judge0-ide.json"    
+    #     headers = {"content-type": "application/x-www-form-urlencoded"}
+    #     base_url = "https://pb.judge0.com/"
+    #     ide_url = "https://ide.judge0.com/?"
 
-        data = {"content": content, "filename": filename}
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                base_url, data=data, headers=headers
-            ) as resp:
-                if resp.status != 200:
-                    return f"{resp.status} {responses[resp.status]}"
-                resp_text = await resp.text()
-                for param in resp_text.split('\n'):
-                    if param.startswith('url: '):
-                        link = param.strip('url: ')
-                        return link.replace(base_url, ide_url).strip('.json')
-                return f"{resp}/{(await resp.json())['key']}"
+    #     data = {"content": content, "filename": filename}
+    #     async with aiohttp.ClientSession() as session:
+    #         async with session.post(
+    #             base_url, data=data, headers=headers
+    #         ) as resp:
+    #             if resp.status != 200:
+    #                 return f"{resp.status} {responses[resp.status]}"
+    #             resp_text = await resp.text()
+    #             for param in resp_text.split('\n'):
+    #                 if param.startswith('url: '):
+    #                     link = param.strip('url: ')
+    #                     return link.replace(base_url, ide_url).strip('.json')
+    #             return f"{resp}/{(await resp.json())['key']}"
 
     async def __create_output_embed(
         self,
+        token: str,
         source_code: Optional[str],
         stdout: str,
         stderr: str,
@@ -114,18 +115,8 @@ class Execution(commands.Cog):
         print(output.count('\n'))
 
         if len(output) > 300 or output.count('\n') > 10:
-            content = json.dumps({"source_code": source_code,
-                       "language_id": language_id,
-                       "stdout": stdout,
-                       "stderr": stderr,
-                       "compile_output": compile_output})
-            pb_post = await self.__post_pastebin(content)
-            if pb_post.startswith("http"):
-                embed.description = f"Output too large - [Full output]({pb_post})"
-            else:
-                embed.description = (
-                    f"Output too large - Full output is unavaible due {pb_post}"
-                )
+            ide_link = "https://ide.judge0.com/?"
+            embed.description = f"Output too large - [Full output]({ide_link}{token})"
 
             if output.count('\n') > 10:
                 output =  '\n'.join(output.split('\n')[:10]) + "\n(...)"
@@ -187,7 +178,7 @@ class Execution(commands.Cog):
                 adict = await submission.json()
                 if adict["status"]["id"] not in [1, 2]:
                     break
-        print(adict)
+        adict['token'] = token
         adict.update(payload)
         return adict
 
@@ -221,6 +212,7 @@ class Execution(commands.Cog):
 
         await ctx.send(
             embed=await self.__create_output_embed(
+                token=submission['token'],
                 source_code=submission["source_code"],
                 stdout=submission["stdout"],
                 stderr=submission["stderr"],
