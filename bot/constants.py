@@ -1,7 +1,7 @@
 from datetime import datetime as dt
 from dataclasses import dataclass
 
-PREFIX = ':'
+PREFIX = ';'
 NEWLINES_LIMIT = 10
 CHARACTERS_LIMIT = 300
 

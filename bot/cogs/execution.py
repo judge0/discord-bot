@@ -196,27 +196,25 @@ class Execution(commands.Cog):
             otherwise it creates an embed for the output and sends it in the same chat
         """
 
-        await ctx.message.add_reaction('<a:typing:597589448607399949>')
 
         if code == None:
-            await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot)
             await ctx.send(embed=self.__create_how_to_pass_embed(lang))
             await ctx.message.add_reaction('<:status_idle:596576773488115722>')
             return
 
         if code.startswith("-v") or code.startswith("-version"):
-            await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot)
             await ctx.send(f"> {lang.version}")
             await ctx.message.add_reaction('<:status_idle:596576773488115722>')
             return
 
+        await ctx.message.add_reaction('<a:typing:597589448607399949>')
         code = self.__strip_source_code(code)
         submission = await self.__get_submission(code, lang.id)
 
         if isinstance(submission, str):  # it is error code
-            await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot)
-            await ctx.send(submission)
             await ctx.message.add_reaction('<:status_offline:596576752013279242>')
+            await ctx.send(submission)
+            await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot.user)
             return
 
         await ctx.send(
@@ -236,11 +234,11 @@ class Execution(commands.Cog):
                 author_icon=ctx.message.author.avatar_url,
             )
         )
-        await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot)
         if submission["status"]["description"] == "Accepted":
             await ctx.message.add_reaction('<:status_online:596576749790429200>')
         else:
             await ctx.message.add_reaction('<:status_dnd:596576774364856321>')
+        await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot.user)
 
     
     @commands.command(name=Lang.Bash.command)
