@@ -107,6 +107,11 @@ class Execution(commands.Cog):
         return embed
 
     def __create_how_to_pass_embed(self, lang):
+        """
+        Creates a Discord embed guide for passing code.
+
+        Includes the 3 methods of passing source code.
+        """
         embed = Embed(title=f"How to pass {lang.version.split('(')[0]}source code?")
 
         embed.set_thumbnail(url=lang.icon)
@@ -221,97 +226,97 @@ class Execution(commands.Cog):
 
     @commands.command(name=Lang.Bash.command)
     async def execute_bash(self, ctx, *, code: Optional[str]):
-        """Executes Bash code; -v to check version."""
+        """Executes Bash code."""
         await self.__execute_code(ctx, Lang.Bash, code)
 
     @commands.command(name=Lang.C.command)
     async def execute_c(self, ctx, *, code: Optional[str]):
-        """Executes C code; -v to check version."""
+        """Executes C code."""
         await self.__execute_code(ctx, Lang.C, code)
 
     @commands.command(name=Lang.Cpp.command, aliases=["c++"])
     async def execute_cpp(self, ctx, *, code: Optional[str]):
-        """Executes C++ code; -v to check version."""
+        """Executes C++ code."""
         await self.__execute_code(ctx, Lang.Cpp, code)
 
     @commands.command(name=Lang.CSharp.command, aliases=["c#"])
     async def execute_csharp(self, ctx, *, code: Optional[str]):
-        """Executes C# code; -v to check version."""
+        """Executes C# code."""
         await self.__execute_code(ctx, Lang.CSharp, code)
 
     @commands.command(name=Lang.Clojure.command)
     async def execute_clojure(self, ctx, *, code: Optional[str]):
-        """Executes Clojure code; -v to check version."""
+        """Executes Clojure code."""
         await self.__execute_code(ctx, Lang.Clojure, code)
 
     @commands.command(name=Lang.Crystal.command)
     async def execute_crystal(self, ctx, *, code: Optional[str]):
-        """Executes Crystal code; -v to check version."""
+        """Executes Crystal code."""
         await self.__execute_code(ctx, Lang.Crystal, code)
 
     @commands.command(name=Lang.Elixir.command)
     async def execute_elixir(self, ctx, *, code: Optional[str]):
-        """Executes Elixir code; -v to check version."""
+        """Executes Elixir code."""
         await self.__execute_code(ctx, Lang.Elixir, code)
 
     @commands.command(name=Lang.Erlang.command)
     async def execute_erlang(self, ctx, *, code: Optional[str]):
-        """Executes Erlang code; -v to check version."""
+        """Executes Erlang code."""
         await self.__execute_code(ctx, Lang.Erlang, code)
 
     @commands.command(name=Lang.Go.command, aliases=["golang"])
     async def execute_go(self, ctx, *, code: Optional[str]):
-        """Executes Golang code; -v to check version."""
+        """Executes Golang code."""
         await self.__execute_code(ctx, Lang.Go, code)
 
     @commands.command(name=Lang.Haskell.command)
     async def execute_haskell(self, ctx, *, code: Optional[str]):
-        """Executes Haskell code; -v to check version."""
+        """Executes Haskell code."""
         await self.__execute_code(ctx, Lang.Haskell, code)
 
     @commands.command(name=Lang.Insect.command)
     async def execute_insect(self, ctx, *, code: Optional[str]):
-        """Executes Insect code; -v to check version."""
+        """Executes Insect code."""
         await self.__execute_code(ctx, Lang.Insect, code)
 
     @commands.command(name=Lang.Java.command)
     async def execute_java(self, ctx, *, code: Optional[str]):
-        """Executes Java code; -v to check version."""
+        """Executes Java code."""
         await self.__execute_code(ctx, Lang.Java, code)
 
     @commands.command(name=Lang.JavaScript.command, aliases=["js"])
     async def execute_js(self, ctx, *, code: Optional[str]):
-        """Executes JavaScript code; -v to check version."""
+        """Executes JavaScript code."""
         await self.__execute_code(ctx, Lang.JavaScript, code)
 
     @commands.command(name=Lang.OCaml.command)
     async def execute_ocaml(self, ctx, *, code: Optional[str]):
-        """Executes OCaml code; -v to check version."""
+        """Executes OCaml code."""
         await self.__execute_code(ctx, Lang.OCaml, code)
 
     @commands.command(name=Lang.Octave.command)
     async def execute_octave(self, ctx, *, code: Optional[str]):
-        """Executes Octave code; -v to check version."""
+        """Executes Octave code."""
         await self.__execute_code(ctx, Lang.Octave, code)
 
     @commands.command(name=Lang.Pascal.command)
     async def execute_pascal(self, ctx, *, code: Optional[str]):
-        """Executes Pascal code; -v to check version."""
+        """Executes Pascal code."""
         await self.__execute_code(ctx, Lang.Pascal, code)
 
     @commands.command(name=Lang.Python.command, aliases=["py"])
     async def execute_python(self, ctx, *, code: Optional[str]):
-        """Executes Python code; -v to check version."""
+        """Executes Python code."""
         await self.__execute_code(ctx, Lang.Python, code)
 
     @commands.command(name=Lang.Ruby.command)
     async def execute_ruby(self, ctx, *, code: Optional[str]):
-        """Executes Ruby code; -v to check version."""
+        """Executes Ruby code."""
         await self.__execute_code(ctx, Lang.Ruby, code)
 
     @commands.command(name=Lang.Rust.command)
     async def execute_rust(self, ctx, *, code: Optional[str]):
-        """Executes Rust code; -v to check version."""
+        """Executes Rust code."""
         await self.__execute_code(ctx, Lang.Rust, code)
 
 

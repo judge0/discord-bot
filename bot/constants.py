@@ -1,12 +1,20 @@
+"""
+Includes a lot of useful constants that are used in the bot.
+"""
+
 from datetime import datetime as dt
 from dataclasses import dataclass
 
 PREFIX = ";"
+
+# output embed limits
 NEWLINES_LIMIT = 10
 CHARACTERS_LIMIT = 300
 
+# time used for calculating uptime
 START_TIME = dt.utcnow()
 
+# some information for the Judge0 support server
 JUDGE0_GUILD = 620615182116323328
 JUDGE0_JOIN_CHANNEL = 623949481167290410
 JUDGE0_TEAM = [365859941292048384, 512551605321596928]
@@ -15,7 +23,14 @@ JUDGE0_ICON = "https://i.imgur.com/Nab2jCa.png"
 
 @dataclass
 class Emoji:
+    """
+    Represents storage for custom and external emojis.
+    """
     class Workers:
+        """
+        Represents emojis for workers health check.
+        (command in bot.cogs.information)
+        """
         total = "<:total:620744869429641236>"
         available = "<:available:620705066604560405>"
         idle = "<:idle:620702759414661120>"
@@ -29,7 +44,10 @@ class Emoji:
 
 @dataclass
 class Lang:
-    count = 19
+    """
+    Represents storage for supported languages.
+    """
+    count = 19 # supported languages
 
     class Bash:
         command = "bash"

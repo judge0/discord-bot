@@ -30,6 +30,7 @@ class Information(commands.Cog):
 
     @commands.command()
     async def info(self, ctx):
+        """Sends useful information about the bot and links."""
         uptime = int((dt.utcnow() - START_TIME).total_seconds())
         d, h = divmod(uptime, 86400)
         h, m = divmod(h, 3600)
@@ -139,6 +140,7 @@ class Information(commands.Cog):
 
     @commands.command()
     async def languages(self, ctx):
+        """Sends a list of all supported languages."""
         pages = list()
         lang_ver = list()
 

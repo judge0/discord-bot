@@ -1,18 +1,23 @@
-"""Embed paginator"""
+"""Embed paginator for paginating too large embes"""
 
 import asyncio
 
 
+# emojis for input
 FAST_PREVIOUS = "\u23EA"  # [:track_previous:]
 PREVIOUS = "\u25C0"  # [:arrow_left:]
 NEXT = "\u25B6"  # [:arrow_right:]
 FAST_NEXT = "\u23E9"  # [:track_next:]
 DELETE_EMOJI = "\U0001F1FD"  # [:x:]
 
+# unite the emojis in one list
 EMOJIS = [FAST_PREVIOUS, PREVIOUS, NEXT, FAST_NEXT, DELETE_EMOJI]
 
 
 class Paginator:
+    """
+    Represents the interactive paginator.
+    """
     def __init__(self, bot, ctx, pages, timeout):
         self.bot = bot
         self.ctx = ctx
@@ -105,6 +110,7 @@ class Paginator:
                     await self.message.edit(embed=self.pages[self.index])
 
     async def wait_first(self, *futures):
+        """Wait for reaction add or reaction remove."""
         done, pending = await asyncio.wait(futures, return_when=asyncio.FIRST_COMPLETED)
         gather = asyncio.gather(*pending)
         gather.cancel()
@@ -115,11 +121,13 @@ class Paginator:
         return done.pop().result()
 
     async def wait_for_reaction_add(self):
+        """Wait for reaction add."""
         return await self.bot.wait_for(
             "reaction_add", check=self.check, timeout=self.timeout
         )
 
     async def wait_for_reaction_remove(self):
+        """Wait for reaction remove."""
         return await self.bot.wait_for(
             "reaction_remove", check=self.check, timeout=self.timeout
         )

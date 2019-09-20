@@ -18,10 +18,8 @@ class Help(commands.Cog):
 
     @commands.command()
     async def help(self, ctx, arg: Optional[str]):
-        if arg:
-            pass
-        else:
-            pages = list()
+        """Sends help for how to use the bot."""
+        if not arg:
             first_page = Embed(
                 timestamp=dt.utcnow(),
                 description=f"Note that **{PREFIX}lang** is a placeholder for a command from **{PREFIX}languages**",
@@ -80,6 +78,7 @@ class Help(commands.Cog):
 
     @commands.command()
     async def lang(self, ctx, arg: Optional[str]):
+        """Guides that lang is only a placeholder."""
         await ctx.send(
             f" **{PREFIX}lang** should be a command from **{PREFIX}languages**."
         )
