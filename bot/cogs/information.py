@@ -9,7 +9,7 @@ from discord import Embed, Color
 from bot.paginator import Paginator
 
 from typing import Optional
-from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, JUDGE0_ICON, START_TIME
+from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, JUDGE0_ICON, START_TIME, PREFIX
 
 
 class Information(commands.Cog):
@@ -38,12 +38,12 @@ class Information(commands.Cog):
         embed.add_field(name='Bot',
                         value=(f'Uptime: {d}d {h}h {m}m {s}s\n'
                                f'Servers connected: {len(self.bot.guilds)}\n'
-                               f'Unique users: {len(self.bot.users)}'),
+                               f'Unique users: {len(self.bot.users)}')  
         )   
         embed.add_field(name='Links',
-                        value=(f'[Bot invite](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=0)\n'
+                        value=(f'[Bot invite](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)\n'
                                f'[Bot repo](https://github.com/judge0/discord-bot)\n'
-                               f'[Support server](https://discord.gg/fbty4Rk)'),
+                               f'[Support server](https://discord.gg/fbty4Rk)')
         )
         embed.add_field(name='Judge0',
                         value=(f'[Website](https://judge0.com/)\n'
@@ -77,12 +77,12 @@ class Information(commands.Cog):
         embed.set_author(name=f'{ctx.author} request',
                          icon_url=ctx.author.avatar_url)
         
-        embed.add_field(name=f"{Emoji.available} Available", value=data['available'])
-        embed.add_field(name=f"{Emoji.idle} IDLE", value=data['idle'])
-        embed.add_field(name=f"{Emoji.total} Total", value=data['total'])
-        embed.add_field(name=f"{Emoji.working} Working", value=data['working'])
-        embed.add_field(name=f"{Emoji.paused} Paused", value=data['paused'])
-        embed.add_field(name=f"{Emoji.failed} Failed", value=data['failed'])
+        embed.add_field(name=f"{Emoji.Workers.available} Available", value=data['available'])
+        embed.add_field(name=f"{Emoji.Workers.idle} IDLE", value=data['idle'])
+        embed.add_field(name=f"{Emoji.Workers.total} Total", value=data['total'])
+        embed.add_field(name=f"{Emoji.Workers.working} Working", value=data['working'])
+        embed.add_field(name=f"{Emoji.Workers.paused} Paused", value=data['paused'])
+        embed.add_field(name=f"{Emoji.Workers.failed} Failed", value=data['failed'])
 
         await ctx.send(embed=embed)
 
@@ -117,30 +117,60 @@ class Information(commands.Cog):
 
     @commands.command()
     async def languages(self, ctx):
-        """Returns a list of all languages supported by the Judge0 API."""
-        base_url = "https://api.judge0.com/languages"
-    
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(base_url) as r:
-                if r.status not in [200, 201]:
-                    await ctx.send(f"{r.status} {responses[r.status]}")
-                    return
-                data = (await r.json())
-
-        alist = [data[x:x+10] for x in range(0, len(data),10)]
         pages = list()
+        lang_ver = list()
+    
+        for lang in dir(Lang)[:Lang.count]:
+            command = eval(f'Lang.{lang}.command')
+            version = eval(f'Lang.{lang}.version') 
+            emoji = eval(f'Lang.{lang}.emoji')  
 
-        for item in alist:
-            description = '\n'.join(f'**{i["id"]}.** {i["name"]}' for i in item)
+            lang_ver.append((command, version, emoji))
+
+        lang_chunks = [lang_ver[x:x+5] for x in range(0, len(lang_ver),5)]
+
+        for chunk in lang_chunks:
             embed = Embed(timestamp=dt.utcnow(),
-                        title='Languages List',
-                        description=description)
+                          title='Supported languages')
             embed.set_author(name=f'{ctx.author} request',
                             icon_url=ctx.author.avatar_url)
-            pages.append(embed)
-
+    
+            for lang in chunk:
+                embed.add_field(name=f'{PREFIX}{lang[0]}',
+                                value=f' {lang[2]} {lang[1]}',
+                                inline=False)
+            pages.append(embed) 
         paginator = Paginator(self.bot, ctx, pages, 30)
         await paginator.run()
+
+
+    #TODO consider this as a future feature
+    # @commands.command()
+    # async def languages(self, ctx):
+    #     """Returns a list of all languages supported by the Judge0 API."""
+    #     base_url = "https://api.judge0.com/languages"
+    
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(base_url) as r:
+    #             if r.status not in [200, 201]:
+    #                 await ctx.send(f"{r.status} {responses[r.status]}")
+    #                 return
+    #             data = (await r.json())
+
+    #     alist = [data[x:x+10] for x in range(0, len(data),10)]
+    #     pages = list()
+
+    #     for item in alist:
+    #         description = '\n'.join(f'**{i["id"]}.** {i["name"]}' for i in item)
+    #         embed = Embed(timestamp=dt.utcnow(),
+    #                     title='Languages List',
+    #                     description=description)
+    #         embed.set_author(name=f'{ctx.author} request',
+    #                         icon_url=ctx.author.avatar_url)
+    #         pages.append(embed)
+
+    #     paginator = Paginator(self.bot, ctx, pages, 30)
+    #     await paginator.run()
 
 def setup(bot):
     bot.add_cog(Information(bot))

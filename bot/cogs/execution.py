@@ -41,33 +41,6 @@ class Execution(commands.Cog):
             code = "\n".join(code.split("\n")[1:])
         return code
 
-    # async def __post_pastebin(self, content):
-    #     """
-    #     Posts output to pastebin if it is too large.
-    #     https://pb.judge0.com/
-        
-    #     Posts to pastebin if the output(stdout, stderr, compile output)
-    #     is more than 1000 characters long.  
-    #     """
-    #     filename = "judge0-ide.json"    
-    #     headers = {"content-type": "application/x-www-form-urlencoded"}
-    #     base_url = "https://pb.judge0.com/"
-    #     ide_url = "https://ide.judge0.com/?"
-
-    #     data = {"content": content, "filename": filename}
-    #     async with aiohttp.ClientSession() as session:
-    #         async with session.post(
-    #             base_url, data=data, headers=headers
-    #         ) as resp:
-    #             if resp.status != 200:
-    #                 return f"{resp.status} {responses[resp.status]}"
-    #             resp_text = await resp.text()
-    #             for param in resp_text.split('\n'):
-    #                 if param.startswith('url: '):
-    #                     link = param.strip('url: ')
-    #                     return link.replace(base_url, ide_url).strip('.json')
-    #             return f"{resp}/{(await resp.json())['key']}"
-
     async def __create_output_embed(
         self,
         token: str,
@@ -291,6 +264,11 @@ class Execution(commands.Cog):
         """Executes Haskell code; -v to check version."""
         await self.__execute_code(ctx, Lang.Haskell, code)
 
+    @commands.command(name=Lang.Insect.command)
+    async def execute_insect(self, ctx, *, code: Optional[str]):
+        """Executes Insect code; -v to check version."""
+        await self.__execute_code(ctx, Lang.Insect, code)
+
     @commands.command(name=Lang.Java.command)
     async def execute_java(self, ctx, *, code: Optional[str]):
         """Executes Java code; -v to check version."""
@@ -300,6 +278,21 @@ class Execution(commands.Cog):
     async def execute_js(self, ctx, *, code: Optional[str]):
         """Executes JavaScript code; -v to check version."""
         await self.__execute_code(ctx, Lang.JavaScript, code)
+
+    @commands.command(name=Lang.OCaml.command)
+    async def execute_ocaml(self, ctx, *, code: Optional[str]):
+        """Executes OCaml code; -v to check version."""
+        await self.__execute_code(ctx, Lang.OCaml, code)
+
+    @commands.command(name=Lang.Octave.command)
+    async def execute_octave(self, ctx, *, code: Optional[str]):
+        """Executes Octave code; -v to check version."""
+        await self.__execute_code(ctx, Lang.Octave, code)
+
+    @commands.command(name=Lang.Pascal.command)
+    async def execute_pascal(self, ctx, *, code: Optional[str]):
+        """Executes Pascal code; -v to check version."""
+        await self.__execute_code(ctx, Lang.Pascal, code)
 
     @commands.command(name=Lang.Python.command, aliases=['py'])
     async def execute_python(self, ctx, *, code: Optional[str]):
