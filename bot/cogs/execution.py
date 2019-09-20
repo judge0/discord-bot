@@ -107,7 +107,9 @@ class Execution(commands.Cog):
         return embed
 
     def __create_how_to_pass_embed(self, lang):
-        embed = Embed(title="How to pass source code?")
+        embed = Embed(title=f"How to pass {lang.version.split('(')[0]}source code?")
+
+        embed.set_thumbnail(url=lang.icon)
         embed.add_field(name='Method 1 (Plain)',
                     value=(f"{PREFIX}{lang.command}\n"
                             "code"),

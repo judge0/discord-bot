@@ -143,6 +143,40 @@ class Information(commands.Cog):
         paginator = Paginator(self.bot, ctx, pages, 30)
         await paginator.run()
 
+    #TODO consider this as a future feature
+    # @commands.command()
+    # async def config(self, ctx):
+    #     """Returns detailed information about configuration of Judge0 API"""
+    #     base_url = "https://api.judge0.com/config_info"
+
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(base_url) as r:
+    #             if r.status not in [200, 201]:
+    #                 await ctx.send(f"{r.status} {responses[r.status]}")
+    #                 return
+    #             data = (await r.json())
+
+
+    #     alist = [list(data)[x:x+5] for x in range(0, len(data),5)]
+    #     pages = list()
+
+    #     for item in alist:
+    #         embed = Embed(timestamp=dt.utcnow(),
+    #                       title='Configuration info')
+    #         embed.set_author(name=f'{ctx.author} request',
+    #                         icon_url=ctx.author.avatar_url)
+            
+    #         for k in item:
+    #             value = str(data[k])
+    #             if 'time' in k:
+    #                 value += ' s'
+    #             elif all():
+    #                 pass
+    #             embed.add_field(name=k.replace('_', ' ').capitalize(), value=value, inline=False)
+    #         pages.append(embed)
+    
+    #     paginator = Paginator(self.bot, ctx, pages, 30)
+    #     await paginator.run()
 
     #TODO consider this as a future feature
     # @commands.command()

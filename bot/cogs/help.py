@@ -46,10 +46,30 @@ class Help(commands.Cog):
             ),
             inline=False
             )
-            pages.append(first_page)
-            paginator = Paginator(self.bot, ctx, pages, 30)
-            await paginator.run()
+            first_page.set_author(name=f'{ctx.author} request',
+                icon_url=ctx.author.avatar_url)
+    
+            first_page.add_field(name=f'{PREFIX}info',
+            value=('Sends useful information and links for the bot, Judge0 and the developers'
+                   ),
+            inline=False
+            )
+            first_page.add_field(name=f'{PREFIX}workers',
+            value=('Sends workers health check information\n'
+                   'Workers do the job of running untrusted programs in sandboxed environment.'
+            ),
+            inline=False
+            )
+            first_page.add_field(name=f'{PREFIX}sytem',
+            value=('Sends detailed information about system on which Judge0 API is running.\n'
+            ),
+            inline=False
+            )
+            await ctx.send(embed=first_page)
    
+    @commands.command()
+    async def lang(self, ctx, arg: Optional[str]):
+        await ctx.send(f" **{PREFIX}lang** should be a command from **{PREFIX}languages**.") 
 
 
 def setup(bot): 
