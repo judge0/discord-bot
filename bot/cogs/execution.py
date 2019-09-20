@@ -85,16 +85,16 @@ class Execution(commands.Cog):
             output = "No output"
 
         print(len(output))
-        print(output.count('\n'))
+        print(output.count("\n"))
 
-        if len(output) > 300 or output.count('\n') > 10:
+        if len(output) > 300 or output.count("\n") > 10:
             ide_link = "https://ide.judge0.com/?"
             embed.description = f"Output too large - [Full output]({ide_link}{token})"
 
-            if output.count('\n') > 10:
-                output =  '\n'.join(output.split('\n')[:10]) + "\n(...)"
+            if output.count("\n") > 10:
+                output = "\n".join(output.split("\n")[:10]) + "\n(...)"
             else:
-                output =  output[:300] + "\n(...)"
+                output = output[:300] + "\n(...)"
 
         embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
 
@@ -110,25 +110,26 @@ class Execution(commands.Cog):
         embed = Embed(title=f"How to pass {lang.version.split('(')[0]}source code?")
 
         embed.set_thumbnail(url=lang.icon)
-        embed.add_field(name='Method 1 (Plain)',
-                    value=(f"{PREFIX}{lang.command}\n"
-                            "code"),
-                    inline=False
+        embed.add_field(
+            name="Method 1 (Plain)",
+            value=(f"{PREFIX}{lang.command}\n" "code"),
+            inline=False,
         )
-        embed.add_field(name='Method 2 (Code block)',
-                    value=(f"{PREFIX}{lang.command}\n"
-                            "\`\`\`code\`\`\`"),
-                    inline=False
+        embed.add_field(
+            name="Method 2 (Code block)",
+            value=(f"{PREFIX}{lang.command}\n" "\`\`\`code\`\`\`"),
+            inline=False,
         )
-        embed.add_field(name='Method 3 (Syntax Highlighting)',
-                        value=(f"{PREFIX}{lang.command}\n"
-                            f"\`\`\`{lang.command}\n"
-                            "code\`\`\`"),
-                    inline=False
+        embed.add_field(
+            name="Method 3 (Syntax Highlighting)",
+            value=(f"{PREFIX}{lang.command}\n" f"\`\`\`{lang.command}\n" "code\`\`\`"),
+            inline=False,
         )
         return embed
 
-    async def __get_submission(self, source_code: Optional[str], language_id: int) -> dict:
+    async def __get_submission(
+        self, source_code: Optional[str], language_id: int
+    ) -> dict:
         """
         Sends submission in judge0 API and waits for output.
         """
@@ -153,7 +154,7 @@ class Execution(commands.Cog):
                 adict = await submission.json()
                 if adict["status"]["id"] not in [1, 2]:
                     break
-        adict['token'] = token
+        adict["token"] = token
         adict.update(payload)
         return adict
 
@@ -171,30 +172,31 @@ class Execution(commands.Cog):
             otherwise it creates an embed for the output and sends it in the same chat
         """
 
-
         if code == None:
             await ctx.send(embed=self.__create_how_to_pass_embed(lang))
-            await ctx.message.add_reaction('<:status_idle:596576773488115722>')
+            await ctx.message.add_reaction("<:status_idle:596576773488115722>")
             return
 
         if code.startswith("-v") or code.startswith("-version"):
             await ctx.send(f"> {lang.version}")
-            await ctx.message.add_reaction('<:status_idle:596576773488115722>')
+            await ctx.message.add_reaction("<:status_idle:596576773488115722>")
             return
 
-        await ctx.message.add_reaction('<a:typing:597589448607399949>')
+        await ctx.message.add_reaction("<a:typing:597589448607399949>")
         code = self.__strip_source_code(code)
         submission = await self.__get_submission(code, lang.id)
 
         if isinstance(submission, str):  # it is error code
-            await ctx.message.add_reaction('<:status_offline:596576752013279242>')
+            await ctx.message.add_reaction("<:status_offline:596576752013279242>")
             await ctx.send(submission)
-            await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot.user)
+            await ctx.message.remove_reaction(
+                "<a:typing:597589448607399949>", self.bot.user
+            )
             return
 
         await ctx.send(
             embed=await self.__create_output_embed(
-                token=submission['token'],
+                token=submission["token"],
                 source_code=submission["source_code"],
                 stdout=submission["stdout"],
                 stderr=submission["stderr"],
@@ -210,12 +212,13 @@ class Execution(commands.Cog):
             )
         )
         if submission["status"]["description"] == "Accepted":
-            await ctx.message.add_reaction('<:status_online:596576749790429200>')
+            await ctx.message.add_reaction("<:status_online:596576749790429200>")
         else:
-            await ctx.message.add_reaction('<:status_dnd:596576774364856321>')
-        await ctx.message.remove_reaction('<a:typing:597589448607399949>', self.bot.user)
+            await ctx.message.add_reaction("<:status_dnd:596576774364856321>")
+        await ctx.message.remove_reaction(
+            "<a:typing:597589448607399949>", self.bot.user
+        )
 
-    
     @commands.command(name=Lang.Bash.command)
     async def execute_bash(self, ctx, *, code: Optional[str]):
         """Executes Bash code; -v to check version."""
@@ -226,12 +229,12 @@ class Execution(commands.Cog):
         """Executes C code; -v to check version."""
         await self.__execute_code(ctx, Lang.C, code)
 
-    @commands.command(name=Lang.Cpp.command, aliases=['c++'])
+    @commands.command(name=Lang.Cpp.command, aliases=["c++"])
     async def execute_cpp(self, ctx, *, code: Optional[str]):
         """Executes C++ code; -v to check version."""
         await self.__execute_code(ctx, Lang.Cpp, code)
 
-    @commands.command(name=Lang.CSharp.command, aliases=['c#'])
+    @commands.command(name=Lang.CSharp.command, aliases=["c#"])
     async def execute_csharp(self, ctx, *, code: Optional[str]):
         """Executes C# code; -v to check version."""
         await self.__execute_code(ctx, Lang.CSharp, code)
@@ -256,7 +259,7 @@ class Execution(commands.Cog):
         """Executes Erlang code; -v to check version."""
         await self.__execute_code(ctx, Lang.Erlang, code)
 
-    @commands.command(name=Lang.Go.command, aliases=['golang'])
+    @commands.command(name=Lang.Go.command, aliases=["golang"])
     async def execute_go(self, ctx, *, code: Optional[str]):
         """Executes Golang code; -v to check version."""
         await self.__execute_code(ctx, Lang.Go, code)
@@ -276,7 +279,7 @@ class Execution(commands.Cog):
         """Executes Java code; -v to check version."""
         await self.__execute_code(ctx, Lang.Java, code)
 
-    @commands.command(name=Lang.JavaScript.command, aliases=['js'])
+    @commands.command(name=Lang.JavaScript.command, aliases=["js"])
     async def execute_js(self, ctx, *, code: Optional[str]):
         """Executes JavaScript code; -v to check version."""
         await self.__execute_code(ctx, Lang.JavaScript, code)
@@ -296,7 +299,7 @@ class Execution(commands.Cog):
         """Executes Pascal code; -v to check version."""
         await self.__execute_code(ctx, Lang.Pascal, code)
 
-    @commands.command(name=Lang.Python.command, aliases=['py'])
+    @commands.command(name=Lang.Python.command, aliases=["py"])
     async def execute_python(self, ctx, *, code: Optional[str]):
         """Executes Python code; -v to check version."""
         await self.__execute_code(ctx, Lang.Python, code)

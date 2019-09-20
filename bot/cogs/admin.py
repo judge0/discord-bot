@@ -4,9 +4,11 @@ from discord.ext import commands
 
 from bot.constants import PREFIX, JUDGE0_TEAM, JUDGE0_GUILD, JUDGE0_JOIN_CHANNEL
 
+
 def is_team_member():
     async def predicate(ctx):
         return ctx.author.id in JUDGE0_TEAM
+
     return commands.check(predicate)
 
 
@@ -27,21 +29,23 @@ class Admin(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, context, exception):
         if str(exception).endswith("Missing Permissions"):
-            await context.send("The bot should have **Add reactions** permission to work properly!")
+            await context.send(
+                "The bot should have **Add reactions** permission to work properly!"
+            )
         else:
             print(exception)
-
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
         if member.guild.id == JUDGE0_GUILD:
             join_channel = self.bot.get_channel(JUDGE0_JOIN_CHANNEL)
             await join_channel.send(
-                ("```python\n"
-                "import server\n"
-                f"user = {member.mention} # {member.display_name}\n"
-                "user.join(server)```\n"
-                f"Welcome to **Judge0 support server** {member.mention}!"
+                (
+                    "```python\n"
+                    "import server\n"
+                    f"user = {member.mention} # {member.display_name}\n"
+                    "user.join(server)```\n"
+                    f"Welcome to **Judge0 support server** {member.mention}!"
                 )
             )
 
@@ -51,20 +55,22 @@ class Admin(commands.Cog):
         """Shuts down the bot."""
         await ctx.send("Terminates.")
         await self.bot.logout()
-    
+
     @is_team_member()
     @commands.command()
     async def servers(self, ctx):
-        
-    #     # guild = self.bot.get_guild(622750805451341844)
-    #     channel = self.bot.get_channel(623850862112014377)
-    #     messages = await channel.history(limit=10).flatten()
 
-    #     print(len(messages))
-    #     for m in messages:
-    #         print(m.content)
-    #     # await ctx.send('\n'.join(f"{g.name} {g.id}" for g in guild.channels))
-        await ctx.send('\n'.join(f"{g.name} -> {len(g.members)}" for g in self.bot.guilds))
+        #     # guild = self.bot.get_guild(622750805451341844)
+        #     channel = self.bot.get_channel(623850862112014377)
+        #     messages = await channel.history(limit=10).flatten()
+
+        #     print(len(messages))
+        #     for m in messages:
+        #         print(m.content)
+        #     # await ctx.send('\n'.join(f"{g.name} {g.id}" for g in guild.channels))
+        await ctx.send(
+            "\n".join(f"{g.name} -> {len(g.members)}" for g in self.bot.guilds)
+        )
 
     @is_team_member()
     @commands.command(aliases=["r"])
@@ -89,7 +95,8 @@ class Admin(commands.Cog):
         """Changing the bot status."""
         self.status_str = arg
         await self.bot.change_presence(
-            activity=discord.Game(self.activity_str), status=eval(f"discord.Status.{self.status_str}")
+            activity=discord.Game(self.activity_str),
+            status=eval(f"discord.Status.{self.status_str}"),
         )
 
     @is_team_member()
@@ -105,6 +112,7 @@ class Admin(commands.Cog):
             if guild.id == 620615182116323328:
                 for emoji in guild.emojis:
                     print(str(emoji))
-    
+
+
 def setup(bot):
     bot.add_cog(Admin(bot))
