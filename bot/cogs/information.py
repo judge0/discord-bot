@@ -58,7 +58,7 @@ class Information(commands.Cog):
             value=(
                 f"[Bot invite](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)\n"
                 f"[Bot repo](https://github.com/judge0/discord-bot)\n"
-                f"[Support server](https://discord.gg/fbty4Rk)"
+                f"[Support server](https://discord.gg/6dvxeA8)"
             ),
         )
         embed.add_field(
