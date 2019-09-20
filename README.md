@@ -8,7 +8,9 @@ Judge0Bot
 </h1>
 
 <div align="center">
-[![Discord](https://discordapp.com/api/guilds/620615182116323328/embed.png)](https://discord.gg/fbty4Rk) 
+<a href="https://discord.gg/fbty4Rk">
+      <img src="ttps://discordapp.com/api/guilds/620615182116323328/embed.png" alt="Judge0 server">
+</a>
 <a href="https://github.com/Rapptz/discord.py/">
       <img src="https://img.shields.io/badge/discord-py-blue.svg" alt="discord.py">
 </a>
