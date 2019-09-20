@@ -8,5 +8,5 @@
 </a>
 
 <p align="center">
-  <img src="https://i.imgur.com/vKqLL6V.png">
+  <img src="https://i.imgur.com/vKqLL6V.png" width="512">
 </p>
