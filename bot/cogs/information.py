@@ -22,7 +22,7 @@ from bot.constants import (
 
 class Information(commands.Cog):
     """
-    Represents instance of a Cog for retrieving judge0 API information.
+    Represents a Cog for retrieving judge0 API information.
     """
 
     def __init__(self, bot):

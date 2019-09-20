@@ -13,6 +13,9 @@ from bot.constants import PREFIX
 
 
 class Help(commands.Cog):
+    """
+    Represents a Cog for sending help.
+    """
     def __init__(self, bot):
         self.bot = bot
 

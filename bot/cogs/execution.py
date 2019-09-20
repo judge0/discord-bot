@@ -20,7 +20,7 @@ from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
 
 class Execution(commands.Cog):
     """
-    Represents instance of a Cog for executing source codes.
+    Represents a Cog for executing source codes.
     """
 
     def __init__(self, bot):
