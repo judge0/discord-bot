@@ -159,8 +159,8 @@ class Lang:
         command = "pascal"
         version = "Pascal (fpc 3.0.0)"
         id = 33
-        icon = "https://i.imgur.com/U1CA0bT.png"
-        emoji = "<:pascal:623909088421478402>"
+        icon = "https://i.imgur.com/KjSF3JE.png"
+        emoji = "<:pascal:624678099518357504>"
 
     class Python:
         command = "python"
