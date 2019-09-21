@@ -58,7 +58,7 @@ class Admin(commands.Cog):
 
     @is_team_member()
     @commands.command(aliases=["q"])
-    async def quit(self, ctx):
+    async def terminate(self, ctx):
         """Shuts down the bot."""
         await ctx.send("Terminates.")
         await self.bot.logout()
