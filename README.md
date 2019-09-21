@@ -50,7 +50,7 @@ Three of the ways of interacting with our bot in the Discord platform:
 
 # Usage
 The bot is quite easy and straightforward for use. There is integrated
-help command in the bot. Send **;help** in the chat and the bot will send helpful
+help command in the bot. Send `;help` in the chat and the bot will send helpful
 information for usage.
 
 # Development
