@@ -4,7 +4,7 @@ Main program for running the bot:
 python -m bot token
 """
 
-import sys
+import os, sys
 
 from discord.ext import commands
 
@@ -20,4 +20,5 @@ bot.load_extension("bot.cogs.help")
 bot.load_extension("bot.cogs.information")
 
 # run the bot with the token
-bot.run(sys.argv[1])
+token = sys.argv[1] if sys.argv[1] else os.environ["BOT_TOKEN"]
+bot.run(token)
