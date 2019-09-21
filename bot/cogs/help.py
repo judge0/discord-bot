@@ -71,7 +71,7 @@ class Help(commands.Cog):
                 inline=False,
             )
             first_page.add_field(
-                name=f"{PREFIX}sytem",
+                name=f"{PREFIX}system",
                 value=(
                     "Sends detailed information about system on which Judge0 API is running.\n"
                 ),

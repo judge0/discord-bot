@@ -8,7 +8,7 @@ from dataclasses import dataclass
 PREFIX = ";"
 
 # output embed limits
-NEWLINES_LIMIT = 10
+NEWLINES_LIMIT = 10 
 CHARACTERS_LIMIT = 300
 
 # time used for calculating uptime

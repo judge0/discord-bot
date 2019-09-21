@@ -69,6 +69,7 @@ class Execution(commands.Cog):
             Language name, icon and version.
             Datetime of the execution.
         """
+        ide_link = "https://ide.judge0.com/?"
         color = Color.green() if description == "Accepted" else Color.red()
 
         embed = Embed(colour=color, timestamp=datetime.utcnow())
@@ -88,13 +89,14 @@ class Execution(commands.Cog):
         print(output.count("\n"))
 
         if len(output) > 300 or output.count("\n") > 10:
-            ide_link = "https://ide.judge0.com/?"
             embed.description = f"Output too large - [Full output]({ide_link}{token})"
 
             if output.count("\n") > 10:
                 output = "\n".join(output.split("\n")[:10]) + "\n(...)"
             else:
                 output = output[:300] + "\n(...)"
+        else:
+            embed.description = f"Edit this code in an online IDE - [here]({ide_link}{token})"
 
         embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
 
