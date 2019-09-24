@@ -19,6 +19,6 @@ bot.load_extension("bot.cogs.execution")
 bot.load_extension("bot.cogs.help")
 bot.load_extension("bot.cogs.information")
 
-# run the bot with the token
+# run the bot with the token or enviroment variable
 token = sys.argv[1] if sys.argv[1] else os.environ["BOT_TOKEN"]
 bot.run(token)

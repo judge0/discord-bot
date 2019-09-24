@@ -47,7 +47,7 @@ Three of the ways of interacting with our bot in the Discord platform:
 1. **Use the bot from programming servers.**
     The bot is included in large IT related communties.
     [discord.py](https://discord.gg/r3sSKJJ), [ITBG](http://discord.gg/dRrdYQf)
-
+    
 # Usage
 The bot is quite easy and straightforward for use. There is integrated
 help command in the bot. Send `;help` in the chat and the bot will send helpful

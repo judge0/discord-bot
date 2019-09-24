@@ -179,7 +179,7 @@ class Information(commands.Cog):
     #         async with cs.get(base_url) as r:
     #             if r.status not in [200, 201]:
     #                 await ctx.send(f"{r.status} {responses[r.status]}")
-    #                 return
+    #                 return    
     #             data = (await r.json())
 
     #     alist = [list(data)[x:x+5] for x in range(0, len(data),5)]
