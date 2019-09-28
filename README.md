@@ -114,10 +114,10 @@ This is required clone the repository and actually run the bot.
 
 6. **Run the bot**
 
-6.1 **Bot token passed like command-line argument**
+Bot token passed like command-line argument:
 
 `pipenv run start <token>`
 
-6.2 **Bot token set as enviorment variable BOT_TOKEN**
+Bot token set as enviorment variable **BOT_TOKEN**:
 
 `pipenv run start`
