@@ -61,17 +61,28 @@ Every language command have three use cases (Python example):
 <br>
 
 `;python print("Executing source code")`
-This command will execute the passed source code and it will return an output embed which includes information like time and memory usage and output which includes standart output, standart error, compiler message and sandbox message if any.
 
 <br>
 
 
+This command will execute the passed source code and it will return an output embed which includes information like time and memory usage and output which includes standart output, standart error, compiler message and sandbox message if any.
+
+<br>
+
 `;python`
+
+<br>
+
+
 If a language command is send without source code it will return an useful guide how to pass the source code. There are three methods: passing source code in plain format, passing soure code in code block or passing source code in highlighted code block.
 
 <br>
 
 `;python -v`
+
+<br>
+
+
 If argument `-v` is passed instead of source code it will return the version of the language.
 
 # Development
