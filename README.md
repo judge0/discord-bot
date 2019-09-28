@@ -89,3 +89,35 @@ If argument `-v` is passed instead of source code it will return the version of 
 
 # Development
 It is highly preferable if you don't run an instance of my this bot unless you want to contribute.
+
+The installation and running steps are as follows:
+
+1. **Make sure to get git and Python 3.6 or higher**
+
+This is required clone the repository and actually run the bot.
+
+2. **Clone the repository**
+
+`git clone https://github.com/judge0/discord-bot.git`
+
+3. **Enter the directory**
+
+`cd discord-bot`
+
+4. **Install Pipenv**
+
+`python -m pip install pipenv`
+
+5. **Install dependencies**
+
+`pipenv install --dev`
+
+6. **Run the bot**
+
+a) **Bot token passed like command-line argument**
+
+`pipenv run start <token>`
+
+b) **Bot token set as enviorment variable BOT_TOKEN**
+
+`pipenv run start`
