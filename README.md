@@ -61,7 +61,7 @@ Every language command have three use cases (Python example):
 <br>
 
 `;python print("Executing source code")`
-<p align="center">
+<p align="left">
   <img src="https://i.imgur.com/Enafvtn.png" width="256">
 </p>
 
@@ -70,7 +70,7 @@ This command will execute the passed source code and it will return an output em
 <br>
 
 `;python`
-<p align="center">
+<p align="left">
   <img src="https://i.imgur.com/4zW9yd1.png" width="256">
 </p>
 
@@ -80,7 +80,7 @@ If a language command is send without source code it will return an useful guide
 <br>
 
 `;python -v`
-<p align="center">
+<p align="left">
   <img src="https://i.imgur.com/881hbFc.png" width="256">
 </p>
 
