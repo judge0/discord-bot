@@ -61,17 +61,18 @@ Every language command have three use cases (Python example):
 <br>
 
 `;python print("Executing source code")`
-
-<br>
-
+<p align="center">
+  <img src="https://i.imgur.com/Enafvtn.png" width="256">
+</p>
 
 This command will execute the passed source code and it will return an output embed which includes information like time and memory usage and output which includes standart output, standart error, compiler message and sandbox message if any.
 
 <br>
 
 `;python`
-
-<br>
+<p align="center">
+  <img src="https://i.imgur.com/4zW9yd1.png" width="256">
+</p>
 
 
 If a language command is send without source code it will return an useful guide how to pass the source code. There are three methods: passing source code in plain format, passing soure code in code block or passing source code in highlighted code block.
@@ -79,8 +80,9 @@ If a language command is send without source code it will return an useful guide
 <br>
 
 `;python -v`
-
-<br>
+<p align="center">
+  <img src="https://i.imgur.com/881hbFc.png" width="256">
+</p>
 
 
 If argument `-v` is passed instead of source code it will return the version of the language.
