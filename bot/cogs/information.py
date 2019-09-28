@@ -36,7 +36,6 @@ class Information(commands.Cog):
         h, m = divmod(h, 3600)
         m, s = divmod(m, 60)
 
-        owner = (await self.bot.application_info()).owner
         embed = Embed(
             title="Judge0Bot",
             url="https://discordbots.org/bot/620609604295852033",
@@ -78,9 +77,6 @@ class Information(commands.Cog):
             ),
         )
         embed.set_thumbnail(url=JUDGE0_ICON)
-        embed.set_footer(
-            text=f"Main Bot Developer - {owner}", icon_url=owner.avatar_url
-        )
         await ctx.send(embed=embed)
 
     @commands.command()
