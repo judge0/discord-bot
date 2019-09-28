@@ -88,13 +88,13 @@ If a language command is send without source code it will return an useful guide
 If argument `-v` is passed instead of source code it will return the version of the language.
 
 # Development
-It is highly preferable if you don't run an instance of my this bot unless you want to contribute.
+It is highly preferable if you don't run an instance of this bot unless you want to contribute.
 
 The installation and running steps are as follows:
 
 1. **Make sure to get git and Python 3.6 or higher**
 
-This is required clone the repository and actually run the bot.
+This is required to clone the repository and actually run the bot.
 
 2. **Clone the repository**
 
