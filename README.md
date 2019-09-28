@@ -57,11 +57,21 @@ information for usage.
 The code execution is done through sending a language command and passing the source code.
 You can view all language commands after sending `;languages` in the chat.
 Every language command have three use cases (Python example):
-###### ;python print("Executing source code")
+
+<br>
+
+`;python print("Executing source code")`
 This command will execute the passed source code and it will return an output embed which includes information like time and memory usage and output which includes standart output, standart error, compiler message and sandbox message if any.
-###### ;python
+
+<br>
+
+
+`;python`
 If a language command is send without source code it will return an useful guide how to pass the source code. There are three methods: passing source code in plain format, passing soure code in code block or passing source code in highlighted code block.
-###### ;python -v
+
+<br>
+
+`;python -v`
 If argument `-v` is passed instead of source code it will return the version of the language.
 
 # Development
