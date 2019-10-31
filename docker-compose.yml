@@ -5,4 +5,3 @@ services:
     environment:
       - BOT_TOKEN=
     restart: always
-    
