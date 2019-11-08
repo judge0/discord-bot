@@ -11,17 +11,17 @@ Judge0Bot
 
 
 <div align="center">
-<a href="https://discord.gg/6dvxeA8">
-      <img src="https://discordapp.com/api/guilds/620615182116323328/embed.png" alt="Judge0 server">
-</a>
 <a href="https://github.com/Rapptz/discord.py/">
       <img src="https://img.shields.io/badge/discord-py-blue.svg" alt="discord.py">
+</a>
+<a>
+    <img src="https://img.shields.io/github/v/tag/judge0/discord-bot" alt="Version">
 </a>
 <a href="https://github.com/ambv/black">
     <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style: Black">
 </a>
-  <a>
-    <img src="https://img.shields.io/github/v/tag/judge0/discord-bot" alt="Version">
+<a href="https://discord.gg/6dvxeA8">
+      <img src="https://discordapp.com/api/guilds/620615182116323328/embed.png" alt="Judge0 server">
 </a>
 </div>
 
