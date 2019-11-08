@@ -20,6 +20,9 @@ Judge0Bot
 <a href="https://github.com/ambv/black">
     <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style: Black">
 </a>
+  <a>
+    <img src="https://img.shields.io/github/v/tag/judge0/discord-bot" alt="Version">
+</a>
 </div>
 
 <p align="center">
