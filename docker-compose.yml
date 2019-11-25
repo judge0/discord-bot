@@ -1,7 +1,7 @@
 version: '2'
 services:
   bot:
-    image: judge0/discord-bot:1.0.0
+    image: judge0/discord-bot:1.0.1
     environment:
       - BOT_TOKEN=
     restart: always
