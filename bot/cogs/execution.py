@@ -224,7 +224,12 @@ class Execution(commands.Cog):
             await ctx.message.add_reaction("<:status_dnd:596576774364856321>")
         await ctx.message.remove_reaction(
             "<a:typing:597589448607399949>", self.bot.user
-        )
+        )   
+
+    @commands.command(name=Lang.Assembly.command)
+    async def execute_assembly(self, ctx, *, code: Optional[str]):
+        """Executes Assembly code."""
+        await self.__execute_code(ctx, Lang.Assembly, code)
 
     @commands.command(name=Lang.Bash.command)
     async def execute_bash(self, ctx, *, code: Optional[str]):
@@ -246,15 +251,15 @@ class Execution(commands.Cog):
         """Executes C# code."""
         await self.__execute_code(ctx, Lang.CSharp, code)
 
-    @commands.command(name=Lang.Clojure.command)
-    async def execute_clojure(self, ctx, *, code: Optional[str]):
-        """Executes Clojure code."""
-        await self.__execute_code(ctx, Lang.Clojure, code)
+    @commands.command(name=Lang.CommonLisp.command)
+    async def execute_lisp(self, ctx, *, code: Optional[str]):
+        """Executes Common Lisp code."""
+        await self.__execute_code(ctx, Lang.CommonLisp, code)
 
-    @commands.command(name=Lang.Crystal.command)
-    async def execute_crystal(self, ctx, *, code: Optional[str]):
-        """Executes Crystal code."""
-        await self.__execute_code(ctx, Lang.Crystal, code)
+    @commands.command(name=Lang.D.command)
+    async def execute_d(self, ctx, *, code: Optional[str]):
+        """Executes D code."""
+        await self.__execute_code(ctx, Lang.D, code)
 
     @commands.command(name=Lang.Elixir.command)
     async def execute_elixir(self, ctx, *, code: Optional[str]):
@@ -276,11 +281,6 @@ class Execution(commands.Cog):
         """Executes Haskell code."""
         await self.__execute_code(ctx, Lang.Haskell, code)
 
-    @commands.command(name=Lang.Insect.command)
-    async def execute_insect(self, ctx, *, code: Optional[str]):
-        """Executes Insect code."""
-        await self.__execute_code(ctx, Lang.Insect, code)
-
     @commands.command(name=Lang.Java.command)
     async def execute_java(self, ctx, *, code: Optional[str]):
         """Executes Java code."""
@@ -290,6 +290,11 @@ class Execution(commands.Cog):
     async def execute_js(self, ctx, *, code: Optional[str]):
         """Executes JavaScript code."""
         await self.__execute_code(ctx, Lang.JavaScript, code)
+
+    @commands.command(name=Lang.Lua.command)
+    async def execute_lua(self, ctx, *, code: Optional[str]):
+        """Executes Lua code."""
+        await self.__execute_code(ctx, Lang.Lua, code)
 
     @commands.command(name=Lang.OCaml.command)
     async def execute_ocaml(self, ctx, *, code: Optional[str]):
@@ -306,6 +311,16 @@ class Execution(commands.Cog):
         """Executes Pascal code."""
         await self.__execute_code(ctx, Lang.Pascal, code)
 
+    @commands.command(name=Lang.Php.command)
+    async def execute_php(self, ctx, *, code: Optional[str]):
+        """Executes PHP code."""
+        await self.__execute_code(ctx, Lang.Php, code)
+
+    @commands.command(name=Lang.Prolog.command)
+    async def execute_prolog(self, ctx, *, code: Optional[str]):
+        """Executes Prolog code."""
+        await self.__execute_code(ctx, Lang.Prolog, code)
+
     @commands.command(name=Lang.Python.command, aliases=["py"])
     async def execute_python(self, ctx, *, code: Optional[str]):
         """Executes Python code."""
@@ -321,6 +336,10 @@ class Execution(commands.Cog):
         """Executes Rust code."""
         await self.__execute_code(ctx, Lang.Rust, code)
 
+    @commands.command(name=Lang.TypeScript.command)
+    async def execute_typescript(self, ctx, *, code: Optional[str]):
+        """Executes TypeScript code."""
+        await self.__execute_code(ctx, Lang.TypeScript, code)
 
 def setup(bot):
     bot.add_cog(Execution(bot))
