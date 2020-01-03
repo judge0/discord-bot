@@ -10,5 +10,5 @@ COPY . .
 
 CMD ["pipenv", "run", "start"]
 
-LABEL maintainer="Herman Zvonimir Došilović, hermanz.dosilovic@gmail.com"
-LABEL version="1.0.0"
+LABEL maintainer="Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
+LABEL version="1.1.0"
