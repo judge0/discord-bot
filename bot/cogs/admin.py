@@ -89,6 +89,12 @@ class Admin(commands.Cog):
             activity=discord.Game(self.activity_str),
             status=eval(f"discord.Status.{self.status_str}"),
         )
+    
+    @is_team_member()
+    @commands.command(aliases=["g"])
+    async def get_emoji(self, ctx, arg):
+        """Changing the bot status."""
+        await ctx.send(f'```{str(arg)}```')
 
     @is_team_member()
     @commands.command()
@@ -97,6 +103,14 @@ class Admin(commands.Cog):
             if guild.id == 620615182116323328:
                 for emoji in guild.emojis:
                     print(str(emoji))
+        
+    @is_team_member()
+    @commands.command()
+    async def guild_list(self, ctx):
+        guildlist = str()
+        for guild in self.bot.guilds:
+            guildlist += f"{guild.name} - {len(guild.members)}\n"
+        await ctx.send(guildlist)
 
 
 def setup(bot):

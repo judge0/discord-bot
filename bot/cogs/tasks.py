@@ -10,7 +10,7 @@ from typing import Optional
 from discord.ext import commands
 from discord import Embed 
 from bot.cogs.execution import Execution
-from bot.constants import Emoji, Lang, Color
+from bot.constants import Emoji, LANGUAGES, Color
 from bot.paginator import Paginator
 
 
@@ -22,12 +22,16 @@ class Judge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    
+    async def __create_output_embed():
+        pass
+
     @commands.command()
-    async def judge(self, ctx, task_id, language="python"   , *, code: Optional[str]):
+    async def judge(self, ctx, task_id, language="python", *, code: Optional[str]):
         """Runs a judge."""
 
         # Invalid language passed
-        if language not in Lang.ids:
+        if language not in LANGUAGES['ids']:
             await ctx.send('Invalid language is passed!')
             return 
 
@@ -47,28 +51,20 @@ class Judge(commands.Cog):
 
             await ctx.message.add_reaction(Emoji.Execution.loading)
             code = Execution.strip_source_code(code)
-
-            result = str()
             none_failed = True
             pages = list()
             embed = None
+            submissions = list()
 
             for n, case in enumerate(task['test_cases']):
-                submission = await Execution.get_submission(code,
-                                                            Lang.ids[language],
-                                                            stdin='\n'.join(case['inputs']))
+                submissions.append(Execution.prepare_paylad(source_code=code,
+                                                            language_id=LANGUAGES['ids'][language],
+                                                            stdin='\n'.join(case['inputs']),
+                                                            expected_output=case['output']))
 
-                if isinstance(submission, str):  # it is error code
-                    await ctx.message.add_reaction(Emoji.Execution.offline)
-                    await ctx.send(submission)
-                    await ctx.message.remove_reaction(
-                        Emoji.Execution.loading, self.bot.user
-                    )
-                    return
+            result = await Execution.get_batch_submissions(submissions=submissions)
 
-                output = base64.b64decode(submission["stdout"].encode()).decode().strip()
-
-
+            for n, case in enumerate(result['submissions']):
                 if n % 5 == 0 or n == 0 or n == len(task['test_cases']) - 1:
                     if n != 0:
                         pages.append(embed)
@@ -77,23 +73,38 @@ class Judge(commands.Cog):
                         name=f"{ctx.author} submission", icon_url=ctx.author.avatar_url
                     )
 
-                if  output != case["output"]:
-                    none_failed = False
-                    info = "Hidden."
-                    if not case["hidden"]:
-                        info = f'Expected {case["output"]} Got {output}'
+                emoji = Emoji.Execution.error
+                
+                failed = True
+                output = base64.b64decode(case["stdout"].encode()).decode().strip()
 
-                    embed.add_field(
-                        name=f"{Emoji.Execution.error} Test Case {n+1}.",
-                        value=info,
-                        inline=False
-                    )
+                if case['compile_output']:
+                    info = "Compilation error."
+                elif case['stderr']:
+                    info = "Runtime error."
+                elif output != task['test_cases'][n]['output']:
+                    if task['test_cases'][n]['hidden']:
+                        info = "Hidden."
+                    else:
+                        info = f"Expected:\n{task['test_cases'][n]['output']}\nGot:\n{output}"
+                        # if output.count("\n") > 10:
+                    # output = "\n".join(output.split("\n")[:10]) + "\n(...)"
+                # else:
+                #     output = output[:300] + "\n(...)"
+                        
                 else:
-                    embed.add_field(
-                        name=f"{Emoji.Execution.successful} Test Case {n+1}.",
-                        value=f"Got the expected input.",
-                        inline=False
-                    )
+                    info = "Got the expected output."
+                    emoji = Emoji.Execution.successful
+                    failed = False
+                
+                if none_failed and failed:
+                    none_failed = False
+
+                embed.add_field(
+                    name=f"{emoji} Test Case {n+1}.",
+                    value=info,
+                    inline=False
+                )
                 
             if none_failed:
                 await ctx.message.add_reaction(Emoji.Execution.successful)
@@ -102,15 +113,13 @@ class Judge(commands.Cog):
             await ctx.message.remove_reaction(
                 Emoji.Execution.loading, self.bot.user
             )
-
+    
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
 
     @staticmethod
     def __get_language_id(language: str) -> int:
-        pass
-
-
+        pass    
  
     @staticmethod        
     def __pack_embed_dict(data: dict) -> dict:

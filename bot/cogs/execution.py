@@ -14,7 +14,7 @@ from discord.ext import commands
 from discord import Embed, Color
 
 
-from typing import Optional
+from typing import Optional, List
 from bot.constants import LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
 
 
@@ -197,19 +197,45 @@ class Execution(commands.Cog):
     @staticmethod
     def prepare_paylad(source_code: Optional[str],
                        language_id: int,
-                       stdin: str = ""):
+                       stdin: str = "",
+                       expected_output: str = ""):
         base64_code = base64.b64encode(source_code.encode()).decode()
         base64_stdin= base64.b64encode(stdin.encode()).decode()
-        payload = {"source_code": base64_code, "language_id": language_id, "stdin": base64_stdin}
+        
+        payload = {"source_code": base64_code,
+                   "language_id": language_id,
+                   "stdin": base64_stdin,
+                   "expected_output": expected_output}
 
         return payload
+    
+    @staticmethod
+    async def wait_submission(cs, base_url, token: str, batch=False) -> dict:
+         
+        char = '?' if not batch else '&' 
+        while True:
+            submission = await cs.get(f"{base_url}{token}{char}base64_encoded=true")
+            if submission.status not in [200, 201]:
+                return f"{submission.status} {responses[submission.status]}"
+
+            data = await submission.json()
+
+            if batch:
+                if all(i['status']['id'] not in [1, 2] for i in data['submissions']):
+                    # Could be problematic?
+                    # all() of empty list returns True
+                    break
+            else:
+                if data["status"]["id"] not in [1, 2]:
+                    break
+        return data
 
     @staticmethod
     async def get_submission(
         source_code: Optional[str], language_id: int, stdin=""
     ) -> dict:
         """
-        Sends submission in judge0 API and waits for output.
+        Sends submission in Judge0 API and waits for output.
         """
         base_url = "https://api.judge0.com/submissions/"
         payload = Execution.prepare_paylad(source_code, language_id, stdin)
@@ -221,22 +247,31 @@ class Execution(commands.Cog):
                 res = await r.json()
             token = res["token"]
 
+            data = await Execution.wait_submission(cs, base_url, token)
+        data["token"] = token
+        data.update(payload)
+        return data
+
+    @staticmethod
+    async def get_batch_submissions(
+        submissions: list,
+    ) -> dict:
+        """
+        Sends batch submissions in Judge0 API and waits for output.
+        """
+        base_url = "https://api.judge0.com/submissions/batch"
+        payload = {'submissions': submissions}
+        
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post(f"{base_url}?base64_encoded=true", json=payload) as r:
+                if r.status not in [200, 201]:
+                    return f"{r.status} {responses[r.status]}"
+                res = await r.json()
+            token = '?tokens=' + ','.join(item['token'] for item in res)
             print(token)
 
-            while True:
-                submission = await cs.get(f"{base_url}{token}?base64_encoded=true")
-                if submission.status not in [200, 201]:
-                    return f"{submission.status} {responses[submission.status]}"
-
-                adict = await submission.json()
-                if adict["status"]["id"] not in [1, 2]:
-                    break
-        adict["token"] = token
-        adict.update(payload)
-        return adict
-
-    # @staticmethod
-    # async 
+            data = await Execution.wait_submission(cs, base_url, token, batch=True)
+        return data
 
     @staticmethod
     def strip_source_code(code: Optional[str]) -> str:

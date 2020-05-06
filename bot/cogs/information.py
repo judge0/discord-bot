@@ -40,7 +40,7 @@ class Information(commands.Cog):
             title="Judge0Bot",
             url="https://discordbots.org/bot/620609604295852033",
             timestamp=dt.utcnow(),
-            description="Discord bot for running code in the chat through the Judge0 API.",
+            description="Discord bot for problem solving and running code in the chat through the Judge0 API.",
         )
 
         embed.set_author(name=f"{ctx.author} request", icon_url=ctx.author.avatar_url)
@@ -51,60 +51,23 @@ class Information(commands.Cog):
                 f"Servers connected: {len(self.bot.guilds)}\n"
                 f"Unique users: {len(self.bot.users)}"
             ),
+            inline=False
         )
         embed.add_field(
             name="Links",
             value=(
-                f"[Bot invite](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)\n"
-                f"[Bot repo](https://github.com/judge0/discord-bot)\n"
-                f"[Support server](https://discord.gg/6dvxeA8)"
+                f"🔗 [Bot invite](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)\n"
+                f"<:github:707671434427891783>  [GitHub](https://github.com/judge0/discord-bot)\n"
+                f"<:discord:707669307454259395>  [Support server](https://discord.gg/6dvxeA8)\n"
+                f"<:paypal:707665144276320277>  [Donation on PayPal](https://paypal.me/skilldeliver)\n"
+                f"<:patreon:707663083866161232>  [Support me on Patreon](https://www.patreon.com/vmihov)"
             ),
-        )
-        embed.add_field(
-            name="Judge0",
-            value=(
-                f"[Website](https://judge0.com/)\n"
-                f"[Github](https://github.com/judge0)\n"
-                f"[Creator](https://hermanz.dosilovic.com/)"
-            ),
-        )
-        embed.add_field(
-            name="Project",
-            value=(
-                f"[Library](https://github.com/Rapptz/discord.py/)\n"
-                f"[Hosting](https://www.digitalocean.com/)\n"
-                f"[Developer](https://github.com/skilldeliver)"
-            ),
+            inline=False
         )
         embed.set_thumbnail(url=JUDGE0_ICON)
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def workers(self, ctx):
-        """Returns health check information about the workers."""
-        base_url = "https://api.judge0.com/workers"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(base_url) as r:
-                if r.status not in [200, 201, 500]:
-                    await ctx.send(f"{r.status} {responses[r.status]}")
-                    return
-
-                data = (await r.json())[0]
-        embed = Embed(timestamp=dt.utcnow(), title="Workers Health Check")
-
-        embed.set_author(name=f"{ctx.author} request", icon_url=ctx.author.avatar_url)
-
-        embed.add_field(
-            name=f"{Emoji.Workers.available} Available", value=data["available"]
-        )
-        embed.add_field(name=f"{Emoji.Workers.idle} IDLE", value=data["idle"])
-        embed.add_field(name=f"{Emoji.Workers.total} Total", value=data["total"])
-        embed.add_field(name=f"{Emoji.Workers.working} Working", value=data["working"])
-        embed.add_field(name=f"{Emoji.Workers.paused} Paused", value=data["paused"])
-        embed.add_field(name=f"{Emoji.Workers.failed} Failed", value=data["failed"])
-
-        await ctx.send(embed=embed)
 
     @commands.command(aliases=["sys"])
     async def system(self, ctx):
@@ -164,6 +127,34 @@ class Information(commands.Cog):
             pages.append(embed)
         paginator = Paginator(self.bot, ctx, pages, 30)
         await paginator.run()
+
+    #TODO decide if it's going to be used
+    # @commands.command()
+    # async def workers(self, ctx):
+    #     """Returns health check information about the workers."""
+    #     base_url = "https://api.judge0.com/workers"
+
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(base_url) as r:
+    #             if r.status not in [200, 201, 500]:
+    #                 await ctx.send(f"{r.status} {responses[r.status]}")
+    #                 return
+
+    #             data = (await r.json())[0]
+    #     embed = Embed(timestamp=dt.utcnow(), title="Workers Health Check")
+
+    #     embed.set_author(name=f"{ctx.author} request", icon_url=ctx.author.avatar_url)
+
+    #     embed.add_field(
+    #         name=f"{Emoji.Workers.available} Available", value=data["available"]
+    #     )
+    #     embed.add_field(name=f"{Emoji.Workers.idle} IDLE", value=data["idle"])
+    #     embed.add_field(name=f"{Emoji.Workers.total} Total", value=data["total"])
+    #     embed.add_field(name=f"{Emoji.Workers.working} Working", value=data["working"])
+    #     embed.add_field(name=f"{Emoji.Workers.paused} Paused", value=data["paused"])
+    #     embed.add_field(name=f"{Emoji.Workers.failed} Failed", value=data["failed"])
+
+    #     await ctx.send(embed=embed)
 
     # TODO consider this as a future feature
     # @commands.command()
