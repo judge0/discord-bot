@@ -10,7 +10,7 @@ from bot.paginator import Paginator
 
 from typing import Optional
 from bot.constants import (
-    Lang,
+    LANGUAGES,
     NEWLINES_LIMIT,
     CHARACTERS_LIMIT,
     Emoji,
@@ -140,10 +140,10 @@ class Information(commands.Cog):
         pages = list()
         lang_ver = list()
 
-        for lang in dir(Lang)[: Lang.count]:
-            command = eval(f"Lang.{lang}.command")
-            version = eval(f"Lang.{lang}.version")
-            emoji = eval(f"Lang.{lang}.emoji")
+        for _, lang in LANGUAGES['array'].items():
+            command = lang['command'] # eval(f"Lang.{lang}.command")
+            version = lang['version'] # eval(f"Lang.{lang}.version")
+            emoji = lang['emoji'] # eval(f"Lang.{lang}.emoji")
 
             lang_ver.append((command, version, emoji))
 

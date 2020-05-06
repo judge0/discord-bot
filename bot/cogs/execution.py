@@ -15,7 +15,7 @@ from discord import Embed, Color
 
 
 from typing import Optional
-from bot.constants import Lang, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
+from bot.constants import LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
 
 
 class Execution(commands.Cog):
@@ -99,22 +99,22 @@ class Execution(commands.Cog):
 
         Includes the 3 methods of passing source code.
         """
-        embed = Embed(title=f"How to pass {lang.version.split('(')[0]}source code?")
+        embed = Embed(title=f"How to pass {lang['version'].split('(')[0]}source code?")
 
-        embed.set_thumbnail(url=lang.icon)
+        embed.set_thumbnail(url=lang['icon'])
         embed.add_field(
             name="Method 1 (Plain)",
-            value=(f"{PREFIX}{lang.command}\n" "code"),
+            value=(f"{PREFIX}{lang['command']}\n" "code"),
             inline=False,
         )
         embed.add_field(
             name="Method 2 (Code block)",
-            value=(f"{PREFIX}{lang.command}\n" "\`\`\`code\`\`\`"),
+            value=(f"{PREFIX}{lang['command']}\n" "\`\`\`code\`\`\`"),
             inline=False,
         )
         embed.add_field(
             name="Method 3 (Syntax Highlighting)",
-            value=(f"{PREFIX}{lang.command}\n" f"\`\`\`{lang.command}\n" "code\`\`\`"),
+            value=(f"{PREFIX}{lang['command']}\n" f"\`\`\`{lang['command']}\n" "code\`\`\`"),
             inline=False,
         )
         return embed
@@ -141,13 +141,13 @@ class Execution(commands.Cog):
             return
 
         if code.startswith("-v") or code.startswith("-version"):
-            await ctx.send(f"> {lang.version}")
+            await ctx.send(f"> {lang['version']}")
             await ctx.message.add_reaction(Emoji.Execution.idle)
             return
 
         await ctx.message.add_reaction(Emoji.Execution.loading)
         code = self.strip_source_code(code)
-        submission = await self.get_submission(code, lang)
+        submission = await self.get_submission(code, lang['id'])
 
         if isinstance(submission, str):  # it is error code
             await ctx.message.add_reaction(Emoji.Execution.offline)
@@ -166,9 +166,9 @@ class Execution(commands.Cog):
                 compile_output=submission["compile_output"],
                 time=submission["time"],
                 memory=submission["memory"],
-                language=lang.version,
+                language=lang['version'],
                 language_id=submission["language_id"],
-                language_icon=lang.icon,
+                language_icon=lang['icon'],
                 description=submission["status"]["description"],
                 author_name=str(ctx.message.author),
                 author_icon=ctx.message.author.avatar_url,
@@ -182,131 +182,22 @@ class Execution(commands.Cog):
             Emoji.Execution.loading, self.bot.user
         )
 
-    @commands.group(pass_context=True, aliases=list(Lang.ids.keys()))
+    @commands.group(pass_context=True, aliases=list(LANGUAGES['ids'].keys()))
     async def run(self, ctx, *, code: Optional[str]):
-        await self.__execute_code(ctx, Lang.ids[str(ctx.invoked_with)], code)
+        lang_id = LANGUAGES['ids'][str(ctx.invoked_with)]
+        lang = LANGUAGES['array'][lang_id]
+        lang.update({'id': lang_id})
+        print(lang, lang_id)
+        # lang['id'] = lang_id
+
+        await self.__execute_code(ctx, lang, code)
         # if ctx.invoked_subcommand is None:
         #     await ctx.wait('Invalid sub command passed...')
 
-    # @run.command(name=Lang.Assembly.command)
-    # async def execute_assembly(self, ctx, *, code: Optional[str]):
-    #     """Executes Assembly code."""
-    #     await self.__execute_code(ctx, Lang.Assembly, code)
-
-    # @run.command(name=Lang.Bash.command, aliases=Lang.Bash.aliases)
-    # async def execute_bash(self, ctx, *, code: Optional[str]):
-    #     """Executes Bash code."""
-    #     await self.__execute_code(ctx, Lang.Bash, code)
-
-    # @run.command(name=Lang.C.command)
-    # async def execute_c(self, ctx, *, code: Optional[str]):
-    #     """Executes C code."""
-    #     await self.__execute_code(ctx, Lang.C, code)
-
-    # @run.command(name=Lang.Cpp.command, aliases=Lang.Cpp.aliases)
-    # async def execute_cpp(self, ctx, *, code: Optional[str]):
-    #     """Executes C++ code."""
-    #     await self.__execute_code(ctx, Lang.Cpp, code)
-
-    # @run.command(name=Lang.CSharp.command, aliases=Lang.CSharp.aliases)
-    # async def execute_csharp(self, ctx, *, code: Optional[str]):
-    #     """Executes C# code."""
-    #     await self.__execute_code(ctx, Lang.CSharp, code)
-
-    # @run.command(name=Lang.CommonLisp.command)
-    # async def execute_lisp(self, ctx, *, code: Optional[str]):
-    #     """Executes Common Lisp code."""
-    #     await self.__execute_code(ctx, Lang.CommonLisp, code)
-
-    # @run.command(name=Lang.D.command)
-    # async def execute_d(self, ctx, *, code: Optional[str]):
-    #     """Executes D code."""
-    #     await self.__execute_code(ctx, Lang.D, code)
-
-    # @run.command(name=Lang.Elixir.command)
-    # async def execute_elixir(self, ctx, *, code: Optional[str]):
-    #     """Executes Elixir code."""
-    #     await self.__execute_code(ctx, Lang.Elixir, code)
-
-    # @run.command(name=Lang.Erlang.command)
-    # async def execute_erlang(self, ctx, *, code: Optional[str]):
-    #     """Executes Erlang code."""
-    #     await self.__execute_code(ctx, Lang.Erlang, code)
-
-    # @run.command(name=Lang.Go.command, aliases=Lang.Go.aliases)
-    # async def execute_go(self, ctx, *, code: Optional[str]):
-    #     """Executes Golang code."""
-    #     await self.__execute_code(ctx, Lang.Go, code)
-
-    # @commands.command(name=Lang.Haskell.command)
-    # async def execute_haskell(self, ctx, *, code: Optional[str]):
-    #     """Executes Haskell code."""
-    #     await self.__execute_code(ctx, Lang.Haskell, code)
-
-    # @commands.command(name=Lang.Java.command)
-    # async def execute_java(self, ctx, *, code: Optional[str]):
-    #     """Executes Java code."""
-    #     await self.__execute_code(ctx, Lang.Java, code)
-
-    # @commands.command(name=Lang.JavaScript.command, aliases=Lang.JavaScript.aliases)
-    # async def execute_js(self, ctx, *, code: Optional[str]):
-    #     """Executes JavaScript code."""
-    #     await self.__execute_code(ctx, Lang.JavaScript, code)
-
-    # @commands.command(name=Lang.Lua.command)
-    # async def execute_lua(self, ctx, *, code: Optional[str]):
-    #     """Executes Lua code."""
-    #     await self.__execute_code(ctx, Lang.Lua, code)
-
-    # @commands.command(name=Lang.OCaml.command)
-    # async def execute_ocaml(self, ctx, *, code: Optional[str]):
-    #     """Executes OCaml code."""
-    #     await self.__execute_code(ctx, Lang.OCaml, code)
-
-    # @commands.command(name=Lang.Octave.command)
-    # async def execute_octave(self, ctx, *, code: Optional[str]):
-    #     """Executes Octave code."""
-    #     await self.__execute_code(ctx, Lang.Octave, code)
-
-    # @commands.command(name=Lang.Pascal.command)
-    # async def execute_pascal(self, ctx, *, code: Optional[str]):
-    #     """Executes Pascal code."""
-    #     await self.__execute_code(ctx, Lang.Pascal, code)
-
-    # @commands.command(name=Lang.Php.command)
-    # async def execute_php(self, ctx, *, code: Optional[str]):
-    #     """Executes PHP code."""
-    #     await self.__execute_code(ctx, Lang.Php, code)
-
-    # @commands.command(name=Lang.Prolog.command)
-    # async def execute_prolog(self, ctx, *, code: Optional[str]):
-    #     """Executes Prolog code."""
-    #     await self.__execute_code(ctx, Lang.Prolog, code)
-
-    # @run.command(name=Lang.Python.command, aliases=Lang.Python.aliases)
-    # async def execute_python(self, ctx, *, code: Optional[str]):
-    #     """Executes Python code."""
-    #     await self.__execute_code(ctx, Lang.Python, code)
-
-    # @commands.command(name=Lang.Ruby.command)
-    # async def execute_ruby(self, ctx, *, code: Optional[str]):
-    #     """Executes Ruby code."""
-    #     await self.__execute_code(ctx, Lang.Ruby, code)
-
-    # @commands.command(name=Lang.Rust.command)
-    # async def execute_rust(self, ctx, *, code: Optional[str]):
-    #     """Executes Rust code."""
-    #     await self.__execute_code(ctx, Lang.Rust, code)
-
-    # @commands.command(name=Lang.TypeScript.command)
-    # async def execute_typescript(self, ctx, *, code: Optional[str]):
-    #     """Executes TypeScript code."""
-    #     await self.__execute_code(ctx, Lang.TypeScript, code)
-
     @staticmethod
     def prepare_paylad(source_code: Optional[str],
-                             language_id: int,
-                             stdin: str = ""):
+                       language_id: int,
+                       stdin: str = ""):
         base64_code = base64.b64encode(source_code.encode()).decode()
         base64_stdin= base64.b64encode(stdin.encode()).decode()
         payload = {"source_code": base64_code, "language_id": language_id, "stdin": base64_stdin}
