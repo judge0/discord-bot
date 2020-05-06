@@ -5,10 +5,12 @@ Includes a lot of useful constants that are used in the bot.
 from datetime import datetime as dt
 from dataclasses import dataclass
 
+from discord import Colour
+
 PREFIX = ";"
 
 # output embed limits
-NEWLINES_LIMIT = 10 
+NEWLINES_LIMIT = 10
 CHARACTERS_LIMIT = 300
 
 # time used for calculating uptime
@@ -21,16 +23,54 @@ JUDGE0_TEAM = [365859941292048384, 512551605321596928]
 JUDGE0_ICON = "https://i.imgur.com/Nab2jCa.png"
 
 
+LANGUAGES = {
+    "ids_map": {
+        "assembly": 45,
+        "bash": 46,
+        "sh": 46,
+        "c": 50,
+        "cpp": 54,
+        "c++": 54,
+        "csharp": 51,
+        "c#": 51,
+        "lisp": 55,
+        "d": 56,
+        "elixir": 57,
+        "erlang": 58,
+        "go": 60,
+        "golang": 60,
+        "haskell": 61,
+        "java": 62,
+        "javascript": 63,
+        "js": 63,
+        "lua": 64,
+        "ocaml": 65,
+        "octave": 66,
+        "pascal": 67,
+        "php": 68,
+        "prolog": 69,
+        "python": 71,
+        "py": 71,
+        "ruby": 72,
+        "rust": 73,
+        "typescript": 74,
+        "ts": 74,
+    }
+}
+
+
 @dataclass
 class Emoji:
     """
     Represents storage for custom and external emojis.
     """
+
     class Workers:
         """
         Represents emojis for workers health check.
         (command in bot.cogs.information)
         """
+
         total = "<:total:620744869429641236>"
         available = "<:available:620705066604560405>"
         idle = "<:idle:620702759414661120>"
@@ -39,7 +79,25 @@ class Emoji:
         failed = "<:failed:620704067525672980>"
 
     class Execution:
-        loading = ""
+        loading = "<a:typing:705421984141672470>"
+        error = "<:dnd:705421983952666674>"
+        successful = "<:online:705421983927763055>"
+        offline = "<:offline:705421983873105920>"
+        idle = "<:idle:705421983906660454>"
+
+
+@dataclass
+class Color:
+    difficulties = [
+        5025872,
+        9225035,
+        13491257,
+        16772154,
+        16761352,
+        16750593,
+        16668450,
+        16073527,
+    ]
 
 
 @dataclass
@@ -47,7 +105,8 @@ class Lang:
     """
     Represents storage for supported languages.
     """
-    count = 23 # supported languages
+
+    count = 23  # supported languages
 
     class Assembly:
         command = "assembly"
@@ -74,6 +133,7 @@ class Lang:
     class Cpp:
         command = "cpp"
         version = "C++ (GCC 9.2.0)"
+        aliases = ["c++"]
         id = 54
         icon = "https://i.imgur.com/CJYqkG5.png"
         emoji = "<:cpp:623909088459227149>"
@@ -81,6 +141,7 @@ class Lang:
     class CSharp:
         command = "csharp"
         version = "C# (Mono 6.6.0.161)"
+        aliases = ["c#"]
         id = 51
         icon = "https://i.imgur.com/M1AQVY2.png"
         emoji = "<:csharp:623909092402003999>"
@@ -116,6 +177,7 @@ class Lang:
     class Go:
         command = "go"
         version = "Go (1.13.5)"
+        aliases = ["golang"]
         id = 60
         icon = "https://i.imgur.com/a3yrHtU.png"
         emoji = "<:golang:623909092913840128>"
@@ -187,6 +249,7 @@ class Lang:
     class Python:
         command = "python"
         version = "Python (3.8.1)"
+        aliases = ["py"]
         id = 71
         icon = "https://i.imgur.com/N4RyEvG.png"
         emoji = "<:python:623909092989075468>"
@@ -212,3 +275,36 @@ class Lang:
         id = 74
         icon = "https://i.imgur.com/IBjXVQv.png"
         emoji = "<:typescript:662723857643208716>"
+
+    ids = {
+        "assembly": 45,
+        "bash": 46,
+        "sh": 46,
+        "c": 50,
+        "cpp": 54,
+        "c++": 54,
+        "csharp": 51,
+        "c#": 51,
+        "lisp": 55,
+        "d": 56,
+        "elixir": 57,
+        "erlang": 58,
+        "go": 60,
+        "golang": 60,
+        "haskell": 61,
+        "java": 62,
+        "javascript": 63,
+        "js": 63,
+        "lua": 64,
+        "ocaml": 65,
+        "octave": 66,
+        "pascal": 67,
+        "php": 68,
+        "prolog": 69,
+        "python": 71,
+        "py": 71,
+        "ruby": 72,
+        "rust": 73,
+        "typescript": 74,
+        "ts": 74,
+    }

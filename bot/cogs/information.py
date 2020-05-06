@@ -149,7 +149,7 @@ class Information(commands.Cog):
 
         lang_chunks = [lang_ver[x : x + 5] for x in range(0, len(lang_ver), 5)]
 
-        for chunk in lang_chunks:
+        for chunk in lang_chunks:   
             embed = Embed(timestamp=dt.utcnow(), title="Supported languages")
             embed.set_author(
                 name=f"{ctx.author} request", icon_url=ctx.author.avatar_url

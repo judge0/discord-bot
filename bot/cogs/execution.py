@@ -26,21 +26,6 @@ class Execution(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    def __strip_source_code(self, code: Optional[str]) -> str:
-        """
-        Strips the source code from a Discord message.
-        
-        It strips:
-            code wrapped in backticks ` (one line code)
-            code wrapped in triple backtick ``` (multiline code)
-            code wrapped in triple backticks and
-                 language keyword ```python (syntax highlighting)
-        """
-        code = code.strip("`")
-        if re.match(r"\w*\n", code):
-            code = "\n".join(code.split("\n")[1:])
-        return code
-
     async def __create_output_embed(
         self,
         token: str,
@@ -134,37 +119,6 @@ class Execution(commands.Cog):
         )
         return embed
 
-    async def __get_submission(
-        self, source_code: Optional[str], language_id: int
-    ) -> dict:
-        """
-        Sends submission in judge0 API and waits for output.
-        """
-        base_url = "https://api.judge0.com/submissions/"
-        base64_code = base64.b64encode(source_code.encode()).decode()
-        payload = {"source_code": base64_code, "language_id": language_id}
-
-        async with aiohttp.ClientSession() as cs:
-            async with cs.post(f"{base_url}?base64_encoded=true", data=payload) as r:
-                if r.status not in [200, 201]:
-                    return f"{r.status} {responses[r.status]}"
-                res = await r.json()
-            token = res["token"]
-
-            print(token)
-
-            while True:
-                submission = await cs.get(f"{base_url}{token}?base64_encoded=true")
-                if submission.status not in [200, 201]:
-                    return f"{submission.status} {responses[submission.status]}"
-
-                adict = await submission.json()
-                if adict["status"]["id"] not in [1, 2]:
-                    break
-        adict["token"] = token
-        adict.update(payload)
-        return adict
-
     async def __execute_code(self, ctx, lang, code: Optional[str]):
         """
         The main method for executing source code from a message.
@@ -178,26 +132,28 @@ class Execution(commands.Cog):
             if is error it sends the error
             otherwise it creates an embed for the output and sends it in the same chat
         """
+        print(lang)
+        print(code)
 
         if code == None:
             await ctx.send(embed=self.__create_how_to_pass_embed(lang))
-            await ctx.message.add_reaction("<:status_idle:596576773488115722>")
+            await ctx.message.add_reaction(Emoji.Execution.idle)
             return
 
         if code.startswith("-v") or code.startswith("-version"):
             await ctx.send(f"> {lang.version}")
-            await ctx.message.add_reaction("<:status_idle:596576773488115722>")
+            await ctx.message.add_reaction(Emoji.Execution.idle)
             return
 
-        await ctx.message.add_reaction("<a:typing:597589448607399949>")
-        code = self.__strip_source_code(code)
-        submission = await self.__get_submission(code, lang.id)
+        await ctx.message.add_reaction(Emoji.Execution.loading)
+        code = self.strip_source_code(code)
+        submission = await self.get_submission(code, lang)
 
         if isinstance(submission, str):  # it is error code
-            await ctx.message.add_reaction("<:status_offline:596576752013279242>")
+            await ctx.message.add_reaction(Emoji.Execution.offline)
             await ctx.send(submission)
             await ctx.message.remove_reaction(
-                "<a:typing:597589448607399949>", self.bot.user
+                Emoji.Execution.loading, self.bot.user
             )
             return
 
@@ -219,127 +175,193 @@ class Execution(commands.Cog):
             )
         )
         if submission["status"]["description"] == "Accepted":
-            await ctx.message.add_reaction("<:status_online:596576749790429200>")
+            await ctx.message.add_reaction(Emoji.Execution.successful)
         else:
-            await ctx.message.add_reaction("<:status_dnd:596576774364856321>")
+            await ctx.message.add_reaction(Emoji.Execution.error)
         await ctx.message.remove_reaction(
-            "<a:typing:597589448607399949>", self.bot.user
-        )   
+            Emoji.Execution.loading, self.bot.user
+        )
 
-    @commands.command(name=Lang.Assembly.command)
-    async def execute_assembly(self, ctx, *, code: Optional[str]):
-        """Executes Assembly code."""
-        await self.__execute_code(ctx, Lang.Assembly, code)
+    @commands.group(pass_context=True, aliases=list(Lang.ids.keys()))
+    async def run(self, ctx, *, code: Optional[str]):
+        await self.__execute_code(ctx, Lang.ids[str(ctx.invoked_with)], code)
+        # if ctx.invoked_subcommand is None:
+        #     await ctx.wait('Invalid sub command passed...')
 
-    @commands.command(name=Lang.Bash.command)
-    async def execute_bash(self, ctx, *, code: Optional[str]):
-        """Executes Bash code."""
-        await self.__execute_code(ctx, Lang.Bash, code)
+    # @run.command(name=Lang.Assembly.command)
+    # async def execute_assembly(self, ctx, *, code: Optional[str]):
+    #     """Executes Assembly code."""
+    #     await self.__execute_code(ctx, Lang.Assembly, code)
 
-    @commands.command(name=Lang.C.command)
-    async def execute_c(self, ctx, *, code: Optional[str]):
-        """Executes C code."""
-        await self.__execute_code(ctx, Lang.C, code)
+    # @run.command(name=Lang.Bash.command, aliases=Lang.Bash.aliases)
+    # async def execute_bash(self, ctx, *, code: Optional[str]):
+    #     """Executes Bash code."""
+    #     await self.__execute_code(ctx, Lang.Bash, code)
 
-    @commands.command(name=Lang.Cpp.command, aliases=["c++"])
-    async def execute_cpp(self, ctx, *, code: Optional[str]):
-        """Executes C++ code."""
-        await self.__execute_code(ctx, Lang.Cpp, code)
+    # @run.command(name=Lang.C.command)
+    # async def execute_c(self, ctx, *, code: Optional[str]):
+    #     """Executes C code."""
+    #     await self.__execute_code(ctx, Lang.C, code)
 
-    @commands.command(name=Lang.CSharp.command, aliases=["c#"])
-    async def execute_csharp(self, ctx, *, code: Optional[str]):
-        """Executes C# code."""
-        await self.__execute_code(ctx, Lang.CSharp, code)
+    # @run.command(name=Lang.Cpp.command, aliases=Lang.Cpp.aliases)
+    # async def execute_cpp(self, ctx, *, code: Optional[str]):
+    #     """Executes C++ code."""
+    #     await self.__execute_code(ctx, Lang.Cpp, code)
 
-    @commands.command(name=Lang.CommonLisp.command)
-    async def execute_lisp(self, ctx, *, code: Optional[str]):
-        """Executes Common Lisp code."""
-        await self.__execute_code(ctx, Lang.CommonLisp, code)
+    # @run.command(name=Lang.CSharp.command, aliases=Lang.CSharp.aliases)
+    # async def execute_csharp(self, ctx, *, code: Optional[str]):
+    #     """Executes C# code."""
+    #     await self.__execute_code(ctx, Lang.CSharp, code)
 
-    @commands.command(name=Lang.D.command)
-    async def execute_d(self, ctx, *, code: Optional[str]):
-        """Executes D code."""
-        await self.__execute_code(ctx, Lang.D, code)
+    # @run.command(name=Lang.CommonLisp.command)
+    # async def execute_lisp(self, ctx, *, code: Optional[str]):
+    #     """Executes Common Lisp code."""
+    #     await self.__execute_code(ctx, Lang.CommonLisp, code)
 
-    @commands.command(name=Lang.Elixir.command)
-    async def execute_elixir(self, ctx, *, code: Optional[str]):
-        """Executes Elixir code."""
-        await self.__execute_code(ctx, Lang.Elixir, code)
+    # @run.command(name=Lang.D.command)
+    # async def execute_d(self, ctx, *, code: Optional[str]):
+    #     """Executes D code."""
+    #     await self.__execute_code(ctx, Lang.D, code)
 
-    @commands.command(name=Lang.Erlang.command)
-    async def execute_erlang(self, ctx, *, code: Optional[str]):
-        """Executes Erlang code."""
-        await self.__execute_code(ctx, Lang.Erlang, code)
+    # @run.command(name=Lang.Elixir.command)
+    # async def execute_elixir(self, ctx, *, code: Optional[str]):
+    #     """Executes Elixir code."""
+    #     await self.__execute_code(ctx, Lang.Elixir, code)
 
-    @commands.command(name=Lang.Go.command, aliases=["golang"])
-    async def execute_go(self, ctx, *, code: Optional[str]):
-        """Executes Golang code."""
-        await self.__execute_code(ctx, Lang.Go, code)
+    # @run.command(name=Lang.Erlang.command)
+    # async def execute_erlang(self, ctx, *, code: Optional[str]):
+    #     """Executes Erlang code."""
+    #     await self.__execute_code(ctx, Lang.Erlang, code)
 
-    @commands.command(name=Lang.Haskell.command)
-    async def execute_haskell(self, ctx, *, code: Optional[str]):
-        """Executes Haskell code."""
-        await self.__execute_code(ctx, Lang.Haskell, code)
+    # @run.command(name=Lang.Go.command, aliases=Lang.Go.aliases)
+    # async def execute_go(self, ctx, *, code: Optional[str]):
+    #     """Executes Golang code."""
+    #     await self.__execute_code(ctx, Lang.Go, code)
 
-    @commands.command(name=Lang.Java.command)
-    async def execute_java(self, ctx, *, code: Optional[str]):
-        """Executes Java code."""
-        await self.__execute_code(ctx, Lang.Java, code)
+    # @commands.command(name=Lang.Haskell.command)
+    # async def execute_haskell(self, ctx, *, code: Optional[str]):
+    #     """Executes Haskell code."""
+    #     await self.__execute_code(ctx, Lang.Haskell, code)
 
-    @commands.command(name=Lang.JavaScript.command, aliases=["js"])
-    async def execute_js(self, ctx, *, code: Optional[str]):
-        """Executes JavaScript code."""
-        await self.__execute_code(ctx, Lang.JavaScript, code)
+    # @commands.command(name=Lang.Java.command)
+    # async def execute_java(self, ctx, *, code: Optional[str]):
+    #     """Executes Java code."""
+    #     await self.__execute_code(ctx, Lang.Java, code)
 
-    @commands.command(name=Lang.Lua.command)
-    async def execute_lua(self, ctx, *, code: Optional[str]):
-        """Executes Lua code."""
-        await self.__execute_code(ctx, Lang.Lua, code)
+    # @commands.command(name=Lang.JavaScript.command, aliases=Lang.JavaScript.aliases)
+    # async def execute_js(self, ctx, *, code: Optional[str]):
+    #     """Executes JavaScript code."""
+    #     await self.__execute_code(ctx, Lang.JavaScript, code)
 
-    @commands.command(name=Lang.OCaml.command)
-    async def execute_ocaml(self, ctx, *, code: Optional[str]):
-        """Executes OCaml code."""
-        await self.__execute_code(ctx, Lang.OCaml, code)
+    # @commands.command(name=Lang.Lua.command)
+    # async def execute_lua(self, ctx, *, code: Optional[str]):
+    #     """Executes Lua code."""
+    #     await self.__execute_code(ctx, Lang.Lua, code)
 
-    @commands.command(name=Lang.Octave.command)
-    async def execute_octave(self, ctx, *, code: Optional[str]):
-        """Executes Octave code."""
-        await self.__execute_code(ctx, Lang.Octave, code)
+    # @commands.command(name=Lang.OCaml.command)
+    # async def execute_ocaml(self, ctx, *, code: Optional[str]):
+    #     """Executes OCaml code."""
+    #     await self.__execute_code(ctx, Lang.OCaml, code)
 
-    @commands.command(name=Lang.Pascal.command)
-    async def execute_pascal(self, ctx, *, code: Optional[str]):
-        """Executes Pascal code."""
-        await self.__execute_code(ctx, Lang.Pascal, code)
+    # @commands.command(name=Lang.Octave.command)
+    # async def execute_octave(self, ctx, *, code: Optional[str]):
+    #     """Executes Octave code."""
+    #     await self.__execute_code(ctx, Lang.Octave, code)
 
-    @commands.command(name=Lang.Php.command)
-    async def execute_php(self, ctx, *, code: Optional[str]):
-        """Executes PHP code."""
-        await self.__execute_code(ctx, Lang.Php, code)
+    # @commands.command(name=Lang.Pascal.command)
+    # async def execute_pascal(self, ctx, *, code: Optional[str]):
+    #     """Executes Pascal code."""
+    #     await self.__execute_code(ctx, Lang.Pascal, code)
 
-    @commands.command(name=Lang.Prolog.command)
-    async def execute_prolog(self, ctx, *, code: Optional[str]):
-        """Executes Prolog code."""
-        await self.__execute_code(ctx, Lang.Prolog, code)
+    # @commands.command(name=Lang.Php.command)
+    # async def execute_php(self, ctx, *, code: Optional[str]):
+    #     """Executes PHP code."""
+    #     await self.__execute_code(ctx, Lang.Php, code)
 
-    @commands.command(name=Lang.Python.command, aliases=["py"])
-    async def execute_python(self, ctx, *, code: Optional[str]):
-        """Executes Python code."""
-        await self.__execute_code(ctx, Lang.Python, code)
+    # @commands.command(name=Lang.Prolog.command)
+    # async def execute_prolog(self, ctx, *, code: Optional[str]):
+    #     """Executes Prolog code."""
+    #     await self.__execute_code(ctx, Lang.Prolog, code)
 
-    @commands.command(name=Lang.Ruby.command)
-    async def execute_ruby(self, ctx, *, code: Optional[str]):
-        """Executes Ruby code."""
-        await self.__execute_code(ctx, Lang.Ruby, code)
+    # @run.command(name=Lang.Python.command, aliases=Lang.Python.aliases)
+    # async def execute_python(self, ctx, *, code: Optional[str]):
+    #     """Executes Python code."""
+    #     await self.__execute_code(ctx, Lang.Python, code)
 
-    @commands.command(name=Lang.Rust.command)
-    async def execute_rust(self, ctx, *, code: Optional[str]):
-        """Executes Rust code."""
-        await self.__execute_code(ctx, Lang.Rust, code)
+    # @commands.command(name=Lang.Ruby.command)
+    # async def execute_ruby(self, ctx, *, code: Optional[str]):
+    #     """Executes Ruby code."""
+    #     await self.__execute_code(ctx, Lang.Ruby, code)
 
-    @commands.command(name=Lang.TypeScript.command)
-    async def execute_typescript(self, ctx, *, code: Optional[str]):
-        """Executes TypeScript code."""
-        await self.__execute_code(ctx, Lang.TypeScript, code)
+    # @commands.command(name=Lang.Rust.command)
+    # async def execute_rust(self, ctx, *, code: Optional[str]):
+    #     """Executes Rust code."""
+    #     await self.__execute_code(ctx, Lang.Rust, code)
+
+    # @commands.command(name=Lang.TypeScript.command)
+    # async def execute_typescript(self, ctx, *, code: Optional[str]):
+    #     """Executes TypeScript code."""
+    #     await self.__execute_code(ctx, Lang.TypeScript, code)
+
+    @staticmethod
+    def prepare_paylad(source_code: Optional[str],
+                             language_id: int,
+                             stdin: str = ""):
+        base64_code = base64.b64encode(source_code.encode()).decode()
+        base64_stdin= base64.b64encode(stdin.encode()).decode()
+        payload = {"source_code": base64_code, "language_id": language_id, "stdin": base64_stdin}
+
+        return payload
+
+    @staticmethod
+    async def get_submission(
+        source_code: Optional[str], language_id: int, stdin=""
+    ) -> dict:
+        """
+        Sends submission in judge0 API and waits for output.
+        """
+        base_url = "https://api.judge0.com/submissions/"
+        payload = Execution.prepare_paylad(source_code, language_id, stdin)
+        
+        async with aiohttp.ClientSession() as cs:
+            async with cs.post(f"{base_url}?base64_encoded=true", json=payload) as r:
+                if r.status not in [200, 201]:
+                    return f"{r.status} {responses[r.status]}"
+                res = await r.json()
+            token = res["token"]
+
+            print(token)
+
+            while True:
+                submission = await cs.get(f"{base_url}{token}?base64_encoded=true")
+                if submission.status not in [200, 201]:
+                    return f"{submission.status} {responses[submission.status]}"
+
+                adict = await submission.json()
+                if adict["status"]["id"] not in [1, 2]:
+                    break
+        adict["token"] = token
+        adict.update(payload)
+        return adict
+
+    # @staticmethod
+    # async 
+
+    @staticmethod
+    def strip_source_code(code: Optional[str]) -> str:
+        """
+        Strips the source code from a Discord message.
+        
+        It strips:
+            code wrapped in backticks ` (one line code)
+            code wrapped in triple backtick ``` (multiline code)
+            code wrapped in triple backticks and
+                 language keyword ```python (syntax highlighting)
+        """
+        code = code.strip("`")
+        if re.match(r"\w*\n", code):
+            code = "\n".join(code.split("\n")[1:])
+        return code
 
 def setup(bot):
     bot.add_cog(Execution(bot))

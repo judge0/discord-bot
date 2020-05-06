@@ -1,0 +1,20 @@
+{
+    "0001":
+    {
+        "title": "Sum two numbers",
+        "difficulty": 4,
+        "description": "Create a program which takes two numbers as an input and prints their sum",
+        "example": "```Input:\n2\n3\nOutput:\n5```",
+        "test_cases": 
+        [
+            {"inputs": ["4", "5"], "output": "9", "hidden": false},
+            {"inputs": ["1", "1"], "output": "2", "hidden": false},
+            {"inputs": ["5", "6"], "output": "12", "hidden": false},
+            {"inputs": ["30", "20"], "output": "4", "hidden": true},
+            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
+            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
+            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
+            {"inputs": ["0", "-5"], "output": "-5", "hidden": true}
+        ]
+    }
+}
