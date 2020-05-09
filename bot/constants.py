@@ -7,7 +7,7 @@ from dataclasses import dataclass
 
 from discord import Colour
 
-PREFIX = ";"
+PREFIX = ":"
 
 # output embed limits
 NEWLINES_LIMIT = 10 

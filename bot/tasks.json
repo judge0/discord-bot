@@ -1,20 +1,127 @@
 {
+    "authors": {
+        "m6YGC":
+        {
+            "name": "Ийон Тихи",
+            "icon_url": "https://i.imgur.com/U3ODt1q.png"
+        },
+        "rDKSK":
+        {
+            "name": "Skilldeliver"
+        }
+    },
+    
     "0001":
     {
+        "author": "rDKSK",
         "title": "Sum two numbers",
-        "difficulty": 4,
-        "description": "Create a program which takes two numbers as an input and prints their sum",
+        "difficulty": 0,
+        "description": "Create a program which takes two numbers as an input and prints their sum.",
         "example": "```Input:\n2\n3\nOutput:\n5```",
-        "test_cases": 
+        "test_cases":
         [
             {"inputs": ["4", "5"], "output": "9", "hidden": false},
             {"inputs": ["1", "1"], "output": "2", "hidden": false},
-            {"inputs": ["5", "6"], "output": "12", "hidden": false},
-            {"inputs": ["30", "20"], "output": "4", "hidden": true},
-            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
-            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
-            {"inputs": ["0", "-5"], "output": "-5", "hidden": true},
+            {"inputs": ["5", "6"], "output": "11", "hidden": true},
+            {"inputs": ["30", "20"], "output": "50", "hidden": true},
             {"inputs": ["0", "-5"], "output": "-5", "hidden": true}
+        ]
+    },
+    "0002":
+    {
+        "author": "m6YGC",
+        "title": "First unique number",
+        "difficulty": 1,
+        "description": "Create a program which takes a list of positive integers as an input and returns the first unique one. If there isn't a unique one return `-1`.",
+        "example": "```Input:\n2 3 5 4 2 6\nOutput:\n3```",
+        "test_cases":
+        [
+            {"inputs": ["2 3 5 4 2 6"], "output": "3", "hidden": false},
+            {"inputs": ["1 2 2 22 2 1 4 4 6"], "output": "22", "hidden": false},
+            {"inputs": ["2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"], "output": "-1", "hidden": true},
+            {"inputs": ["2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 5 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1"], "output": "5", "hidden": true}
+        ]
+    },
+    "0003":
+    {
+        "author": "m6YGC",
+        "title": "Sum of array except self",
+        "difficulty": 2,
+        "description": "Create a program which takes a list of positive integers `nums` as an input and returns a list of integers `sum`, such that `sum[i]` is equal to the sum of all the ints in `nums` except `nums[i]`",
+        "example": "```Input:\n2 3 5 4\nOutput:\n12 11 9 10```",
+        "test_cases":
+        [
+            {"inputs": ["2 3 5 4"], "output": "12 11 9 10", "hidden": false},
+            {"inputs": ["2 3 5 4 5"], "output": "17 16 14 15 14", "hidden": true},
+            {"inputs": ["1 1 1 1 1 1 1 1 1 1 1"], "output": "10 10 10 10 10 10 10 10 10 10 10", "hidden": false},
+            {"inputs": ["12 1 1 1 1 1 1 1 1 1 1 1"], "output": "11 22 22 22 22 22 22 22 22 22 22 22", "hidden": true}
+        ]
+    },
+    "0004":
+    {
+        "author": "m6YGC",
+        "title": "Two's number path",
+        "difficulty": 4,
+        "description": "Create a program which takes two numbers as an input and finds the shortest path between the two using only this three operations:\n\t`* 2` - double\n\t`/ 2` - halve (odd numbers cannot be halved)\n\t`+ 2` - add 2\n\nYou need to return the length of the shortest path. (There could be multiple solution, this is why we look for the length.)",
+        "example": "```Input:\n3\n12\nOutput:\n3\nExplanation:\n3 * 2 -> 6 * 2 -> 12\n 3 OP -> 6 OP -> 12 - length of the path is 3```",
+        "test_cases":
+        [
+            {"inputs": ["1", "1"], "output": "1", "hidden": false},
+            {"inputs": ["3", "12"], "output": "3", "hidden": false},
+            {"inputs": ["12", "3"], "output": "3", "hidden": false},
+            {"inputs": ["5", "9"], "output": "3", "hidden": true},
+            {"inputs": ["9", "2"], "output": "9", "hidden": true},
+            {"inputs": ["9", "12"], "output": "5", "hidden": true}
+        ]
+    },
+    "0005":
+    {
+        "author": "m6YGC",
+        "title": "Poker hand",
+        "difficulty": 5,
+        "description": "Create a program which takes five two char elements, that represent a playing card and return the best possible poker hand that can be made with them.\n The first char shows the suite of the card (H, D, S, C), while the second shows the value (2, 3, 4, 5, 6, 7, 8, 9, T, J, Q, K, A). The expected results is one of `straight-flush`, `four-of-a-kind`, `full-house`, `flush`, `straight`, `three-of-a-kind`, `two-pairs`, `pair`, `high-card`",
+        "example": "```Input:\nHA DA CA HJ HT\nOutput:\nthree-of-a-kind",
+        "test_cases":
+        [
+            {"inputs": ["HA DA CA HJ HT"], "output": "three-of-a-kind", "hidden": false},
+            {"inputs": ["HA D2 H3 C9 DJ"], "output": "high-card", "hidden": false},
+            {"inputs": ["HA HK HQ HJ HT"], "output": "straight-flush", "hidden": true},
+            {"inputs": ["HA DA CA HJ DJ"], "output": "full-house", "hidden": true},
+            {"inputs": ["HA DA CA SA DJ"], "output": "four-of-a-kind", "hidden": true},
+            {"inputs": ["HA HQ SJ DA HT"], "output": "pair", "hidden": true}
+        ]
+    },
+    "0006":
+    {
+        "author": "m6YGC",
+        "title": "Leap year",
+        "difficulty": 1,
+        "description": "Create a program which takes a year and returns `true` or `false` depending on the year being leap or not.",
+        "example": "```Input:\n2020\n3\nOutput:\ntrue```",
+        "test_cases":
+        [
+            {"inputs": ["2020"], "output": "true", "hidden": false},
+            {"inputs": ["1900"], "output": "false", "hidden": false},
+            {"inputs": ["2000"], "output": "true", "hidden": true},
+            {"inputs": ["2014"], "output": "false", "hidden": true},
+            {"inputs": ["2016"], "output": "true", "hidden": true}
+        ]
+    },
+    "0007":
+    {
+        "author": "m6YGC",
+        "title": "Sequence shift",
+        "difficulty": 3,
+        "description": "Create a program which takes a sequence of numbers and/or letters and shifts them in either direction by `n`, return the result.\n NOTE: `abs(n)` can be, and will be bigger then the sequence!",
+        "example": "```Input:\n-2\na 2 3 b 8 9\n3\nOutput:\n3 b 8 9 a 2```",
+        "test_cases":
+        [
+            {"inputs": ["0", "1 2 3 4 5"], "output": "1 2 3 4 5", "hidden": false},
+            {"inputs": ["2", "c 2 b 4 5"], "output": "4 5 c 2 b", "hidden": false},
+            {"inputs": ["-2", "1 2 3 4 5"], "output": "3 4 5 1 2", "hidden": false},
+            {"inputs": ["100", "1 2 3 4 5"], "output": "1 2 3 4 5", "hidden": true},
+            {"inputs": ["-100", "1 2 3 4 5"], "output": "1 2 3 4 5", "hidden": true},
+            {"inputs": ["5", "1 2 3 4 5 6 7 8 9 a b c d e f"], "output": "b c d e f 1 2 3 4 5 6 7 8 9 a", "hidden": true}
         ]
     }
 }

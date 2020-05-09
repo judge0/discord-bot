@@ -60,28 +60,9 @@ class Execution(commands.Cog):
         embed = Embed(colour=color, timestamp=datetime.utcnow())
         embed.set_author(name=f"{author_name}'s code execution", icon_url=author_icon)
 
-        output = str()
-        if stdout:
-            output += base64.b64decode(stdout.encode()).decode()
-        if stderr:
-            output += base64.b64decode(stderr.encode()).decode()
-        if compile_output and not output:
-            output += base64.b64decode(compile_output.encode()).decode()
-        if not output:
-            output = "No output"
 
-        print(len(output))
-        print(output.count("\n"))
-
-        if len(output) > 300 or output.count("\n") > 10:
-            embed.description = f"Output too large - [Full output]({ide_link}{token})"
-
-            if output.count("\n") > 10:
-                output = "\n".join(output.split("\n")[:10]) + "\n(...)"
-            else:
-                output = output[:300] + "\n(...)"
-        else:
-            embed.description = f"Edit this code in an online IDE - [here]({ide_link}{token})"
+        output = Execution.concat_output(stdout, stderr, compile_output)
+        embed = Execution.resize_output_for_embed(output, embed)
 
         embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
 
@@ -184,6 +165,9 @@ class Execution(commands.Cog):
 
     @commands.group(pass_context=True, aliases=list(LANGUAGES['ids'].keys()))
     async def run(self, ctx, *, code: Optional[str]):
+        """
+        The main command which handles the code execution process.
+        """
         lang_id = LANGUAGES['ids'][str(ctx.invoked_with)]
         lang = LANGUAGES['array'][lang_id]
         lang.update({'id': lang_id})
@@ -204,10 +188,42 @@ class Execution(commands.Cog):
         
         payload = {"source_code": base64_code,
                    "language_id": language_id,
-                   "stdin": base64_stdin,
-                   "expected_output": expected_output}
-
+                   "stdin": base64_stdin}
+    
+        if expected_output:
+            payload["expected_output"] = expected_output
         return payload
+
+    @staticmethod
+    def concat_output(stdout: str, stderr: str, compile_output: str):
+        """
+        Concats the output parameters in one output value.
+        """
+        output = str()
+        for each in (stdout, stderr, compile_output):
+            if each:
+                output += base64.b64decode(each.encode()).decode()
+        if not output:
+            return "No output"
+        return output
+    
+    @staticmethod
+    def resize_output_for_embed(output, embed):
+        """
+        Resizes the output for the embed if it is too large.
+        Too large if it contains a lot of characters or a lot of new lines.
+        This prevents abuse of large output which annoying for the users in the chat.
+        """
+        if len(output) > 300 or output.count("\n") > 10:
+            embed.description = f"Output too large - [Full output]({ide_link}{token})"
+
+            if output.count("\n") > 10:
+                output = "\n".join(output.split("\n")[:10]) + "\n(...)"
+            else:
+                output = output[:300] + "\n(...)"
+        else:
+            embed.description = f"Edit this code in an online IDE - [here]({ide_link}{token})"
+        return embed
     
     @staticmethod
     async def wait_submission(cs, base_url, token: str, batch=False) -> dict:

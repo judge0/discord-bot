@@ -35,8 +35,12 @@ class Judge(commands.Cog):
             await ctx.send('Invalid language is passed!')
             return 
 
-        with open("bot/tasks.json") as f:
+        with open("bot/tasks.json", encoding="utf-8") as f:
             data = json.load(f)
+
+            if task_id == 'list':
+                await ctx.send('\n'.join(f'`{i}` **{data[i]["title"]}**: difficulty ({data[i]["difficulty"]})'for i in data))
+                return
 
             # invalid task id is inputed
             if task_id not in data:
@@ -45,7 +49,7 @@ class Judge(commands.Cog):
 
             task = data[task_id]
             if not code: # code is not passed only task is shown
-                embed = Embed.from_dict(self.__pack_embed_dict(task))
+                embed = Embed.from_dict(self.__pack_description_embed_dict(data, task_id)) 
                 await ctx.send(embed=embed)
                 return
 
@@ -65,28 +69,29 @@ class Judge(commands.Cog):
             result = await Execution.get_batch_submissions(submissions=submissions)
 
             for n, case in enumerate(result['submissions']):
-                if n % 5 == 0 or n == 0 or n == len(task['test_cases']) - 1:
-                    if n != 0:
-                        pages.append(embed)
-                    embed = Embed(timestamp=dt.utcnow(), title="Judge0 Result")
-                    embed.set_author(
-                        name=f"{ctx.author} submission", icon_url=ctx.author.avatar_url
-                    )
+                embed = Embed(timestamp=dt.utcnow(), title="Judge0 Result")
+                embed.set_author(
+                    name=f"{ctx.author} submission", icon_url=ctx.author.avatar_url
+                )
 
                 emoji = Emoji.Execution.error
                 
                 failed = True
-                output = base64.b64decode(case["stdout"].encode()).decode().strip()
+                if case['stdout']:
+                    output = base64.b64decode(case["stdout"].encode()).decode().strip()
 
+                
                 if case['compile_output']:
                     info = "Compilation error."
                 elif case['stderr']:
-                    info = "Runtime error."
+                    error = base64.b64decode(case["stderr"].encode()).decode().strip()
+                    info = f"Runtime error. {error}"
                 elif output != task['test_cases'][n]['output']:
                     if task['test_cases'][n]['hidden']:
                         info = "Hidden."
                     else:
                         info = f"Expected:\n{task['test_cases'][n]['output']}\nGot:\n{output}"
+                        
                         # if output.count("\n") > 10:
                     # output = "\n".join(output.split("\n")[:10]) + "\n(...)"
                 # else:
@@ -105,6 +110,7 @@ class Judge(commands.Cog):
                     value=info,
                     inline=False
                 )
+                pages.append(embed)
                 
             if none_failed:
                 await ctx.message.add_reaction(Emoji.Execution.successful)
@@ -122,17 +128,23 @@ class Judge(commands.Cog):
         pass    
  
     @staticmethod        
-    def __pack_embed_dict(data: dict) -> dict:
+    def __pack_description_embed_dict(data: dict, task_id: str) -> dict:
+
+        task = data[task_id]
         embed_dict = {
-            "color": Color.difficulties[data['difficulty'] - 1],
-            "title": data["title"],
-            "description": data["description"],
+            "color": Color.difficulties[task['difficulty'] - 1],
+            "title": task["title"],
+            "description": task["description"],
+            "author": {
+                **data["authors"][task["author"]]
+            },
             "fields": [
                 {
                     "name": "Example",
-                    "value": data["example"]
+                    "value": task["example"]
                 }
             ],
+
         }
         return embed_dict
             
