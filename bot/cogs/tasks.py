@@ -41,7 +41,7 @@ class Judge(commands.Cog):
             if task_id == 'list':
                 await ctx.send('\n'.join(f'`{i}` **{data[i]["title"]}**: difficulty ({data[i]["difficulty"]})'for i in data if i != 'authors'))
                 return
-
+            
             # invalid task id is inputed
             if task_id not in data:
                 await ctx.send("Invalid task id!")
@@ -61,6 +61,9 @@ class Judge(commands.Cog):
             submissions = list()
 
             await ctx.message.delete()
+
+            language_id = LANGUAGES['ids'][language]
+            message = await ctx.send(f"{ctx.message.author.mention} submited a solution to problem {task_id} in {LANGUAGES['array'][language_id]['version']}")
 
             for n, case in enumerate(task['test_cases']):
                 submissions.append(Execution.prepare_paylad(source_code=code,
@@ -118,7 +121,7 @@ class Judge(commands.Cog):
             #     await ctx.message.add_reaction(Emoji.Execution.successful)
             # else:
             #     await ctx.message.add_reaction(Emoji.Execution.error)
-    
+            await message.delete()
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
 
