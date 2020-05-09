@@ -39,7 +39,7 @@ class Judge(commands.Cog):
             data = json.load(f)
 
             if task_id == 'list':
-                await ctx.send('\n'.join(f'`{i}` **{data[i]["title"]}**: difficulty ({data[i]["difficulty"]})'for i in data))
+                await ctx.send('\n'.join(f'`{i}` **{data[i]["title"]}**: difficulty ({data[i]["difficulty"]})'for i in data if i != 'authors'))
                 return
 
             # invalid task id is inputed
@@ -53,12 +53,14 @@ class Judge(commands.Cog):
                 await ctx.send(embed=embed)
                 return
 
-            await ctx.message.add_reaction(Emoji.Execution.loading)
+            # await ctx.message.add_reaction(Emoji.Execution.loading)
             code = Execution.strip_source_code(code)
             none_failed = True
             pages = list()
             embed = None
             submissions = list()
+
+            await ctx.message.delete()
 
             for n, case in enumerate(task['test_cases']):
                 submissions.append(Execution.prepare_paylad(source_code=code,
@@ -112,13 +114,10 @@ class Judge(commands.Cog):
                 )
                 pages.append(embed)
                 
-            if none_failed:
-                await ctx.message.add_reaction(Emoji.Execution.successful)
-            else:
-                await ctx.message.add_reaction(Emoji.Execution.error)
-            await ctx.message.remove_reaction(
-                Emoji.Execution.loading, self.bot.user
-            )
+            # if none_failed:
+            #     await ctx.message.add_reaction(Emoji.Execution.successful)
+            # else:
+            #     await ctx.message.add_reaction(Emoji.Execution.error)
     
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
@@ -132,9 +131,9 @@ class Judge(commands.Cog):
 
         task = data[task_id]
         embed_dict = {
-            "color": Color.difficulties[task['difficulty'] - 1],
             "title": task["title"],
             "description": task["description"],
+            "color": Color.difficulties[task['difficulty']],
             "author": {
                 **data["authors"][task["author"]]
             },
