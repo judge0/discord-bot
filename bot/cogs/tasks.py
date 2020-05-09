@@ -60,7 +60,7 @@ class Judge(commands.Cog):
             embed = None
             submissions = list()
 
-            await ctx.message.delete()
+            # await ctx.message.delete()
 
             language_id = LANGUAGES['ids'][language]
             message = await ctx.send(f"{ctx.message.author.mention} submited a solution to problem {task_id} in {LANGUAGES['array'][language_id]['version']}")
@@ -82,8 +82,11 @@ class Judge(commands.Cog):
                 emoji = Emoji.Execution.error
                 
                 failed = True
+
+                output = str()
                 if case['stdout']:
                     output = base64.b64decode(case["stdout"].encode()).decode().strip()
+
 
                 
                 if case['compile_output']:
@@ -121,7 +124,7 @@ class Judge(commands.Cog):
             #     await ctx.message.add_reaction(Emoji.Execution.successful)
             # else:
             #     await ctx.message.add_reaction(Emoji.Execution.error)
-            await message.delete()
+            # await message.delete()
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
 
