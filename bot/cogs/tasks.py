@@ -60,7 +60,7 @@ class Judge(commands.Cog):
             embed = None
             submissions = list()
 
-            # await ctx.message.delete()
+            await ctx.message.delete()
 
             language_id = LANGUAGES['ids'][language]
             message = await ctx.send(f"{ctx.message.author.mention} submited a solution to problem {task_id} in {LANGUAGES['array'][language_id]['version']}")
@@ -84,10 +84,14 @@ class Judge(commands.Cog):
                 failed = True
 
                 output = str()
-                if case['stdout']:
+                if case['stdout']:  
                     output = base64.b64decode(case["stdout"].encode()).decode().strip()
 
-
+                trimed_output = output
+                if trimed_output.count("\n") > 10:
+                    trimed_output = "(...)\n" + "\n".join(trimed_output.split("\n")[:10])
+                if len(output) > 300:
+                    trimed_output = "(...)\n" * trimed_output[:300]
                 
                 if case['compile_output']:
                     info = "Compilation error."
@@ -98,12 +102,14 @@ class Judge(commands.Cog):
                     if task['test_cases'][n]['hidden']:
                         info = "Hidden."
                     else:
-                        info = f"Expected:\n{task['test_cases'][n]['output']}\nGot:\n{output}"
-                        
-                        # if output.count("\n") > 10:
-                    # output = "\n".join(output.split("\n")[:10]) + "\n(...)"
-                # else:
-                #     output = output[:300] + "\n(...)"
+                        test_input = '\n'.join(task['test_cases'][n]['inputs'])
+                        info = (
+                                f"**On input:**\n"
+                                f"{test_input}\n"
+                                f"**Expected:**\n"
+                                f"{task['test_cases'][n]['output']}\n"
+                                f"**Got:**\n{trimed_output}"
+                                )
                         
                 else:
                     info = "Got the expected output."
@@ -124,7 +130,7 @@ class Judge(commands.Cog):
             #     await ctx.message.add_reaction(Emoji.Execution.successful)
             # else:
             #     await ctx.message.add_reaction(Emoji.Execution.error)
-            # await message.delete()
+            await message.delete()
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
 
