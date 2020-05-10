@@ -91,13 +91,13 @@ class Judge(commands.Cog):
                 if trimed_output.count("\n") > 10:
                     trimed_output = "(...)\n" + "\n".join(trimed_output.split("\n")[:10])
                 if len(output) > 300:
-                    trimed_output = "(...)\n" * trimed_output[:300]
+                    trimed_output = "(...)\n" + trimed_output[:300]
                 
                 if case['compile_output']:
                     info = "Compilation error."
                 elif case['stderr']:
                     error = base64.b64decode(case["stderr"].encode()).decode().strip()
-                    info = f"Runtime error. {error}"
+                    info = f"Runtime error."
                 elif output != task['test_cases'][n]['output']:
                     if task['test_cases'][n]['hidden']:
                         info = "Hidden."
