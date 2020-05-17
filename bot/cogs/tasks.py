@@ -8,7 +8,7 @@ import json
 from typing import Optional
 
 from discord.ext import commands
-from discord import Embed 
+from discord import Embed, Color as DiscordColor 
 from bot.cogs.execution import Execution
 from bot.constants import Emoji, LANGUAGES, Color
 from bot.paginator import Paginator
@@ -31,6 +31,11 @@ class Judge(commands.Cog):
         """Runs a judge."""
 
         # Invalid language passed
+        
+        if ctx.message.attachments:
+            content = await ctx.message.attachments[0].read()
+            code = content.decode('utf-8').strip()
+
         if language not in LANGUAGES['ids']:
             await ctx.send('Invalid language is passed!')
             return 
@@ -53,12 +58,13 @@ class Judge(commands.Cog):
                 await ctx.send(embed=embed)
                 return
 
-            # await ctx.message.add_reaction(Emoji.Execution.loading)
             code = Execution.strip_source_code(code)
             none_failed = True
             pages = list()
             embed = None
+            passed_count = int()
             submissions = list()
+            test_cases = list()
 
             await ctx.message.delete()
 
@@ -71,16 +77,13 @@ class Judge(commands.Cog):
                                                             stdin='\n'.join(case['inputs']),
                                                             expected_output=case['output']))
 
+
+
             result = await Execution.get_batch_submissions(submissions=submissions)
 
             for n, case in enumerate(result['submissions']):
-                embed = Embed(timestamp=dt.utcnow(), title="Judge0 Result")
-                embed.set_author(
-                    name=f"{ctx.author} submission", icon_url=ctx.author.avatar_url
-                )
-
+                # values to prove the oposite
                 emoji = Emoji.Execution.error
-                
                 failed = True
 
                 output = str()
@@ -93,43 +96,54 @@ class Judge(commands.Cog):
                 if len(output) > 300:
                     trimed_output = "(...)\n" + trimed_output[:300]
                 
+
+                test_case = f"{emoji} **Test case #{n + 1}**"
+                if task['test_cases'][n]['hidden']:
+                    test_case += " (Hidden)"
+
                 if case['compile_output']:
-                    info = "Compilation error."
+                    info = base64.b64decode(case["compile_output"].encode()).decode().strip()    
                 elif case['stderr']:
-                    error = base64.b64decode(case["stderr"].encode()).decode().strip()
-                    info = f"Runtime error."
+                    info = base64.b64decode(case["stderr"].encode()).decode().strip()
                 elif output != task['test_cases'][n]['output']:
-                    if task['test_cases'][n]['hidden']:
-                        info = "Hidden."
-                    else:
-                        test_input = '\n'.join(task['test_cases'][n]['inputs'])
-                        info = (
-                                f"**On input:**\n"
-                                f"{test_input}\n"
-                                f"**Expected:**\n"
-                                f"{task['test_cases'][n]['output']}\n"
-                                f"**Got:**\n{trimed_output}"
-                                )
+                    test_input = '\n'.join(task['test_cases'][n]['inputs'])
+                    info = (
+                            f"**On input:**\n"
+                            f"{test_input}\n"
+                            f"**Expected:**\n"
+                            f"{task['test_cases'][n]['output']}\n"
+                            f"**Got:**\n{trimed_output}"
+                            )
                         
                 else:
-                    info = "Got the expected output."
+                    passed_count += 1
                     emoji = Emoji.Execution.successful
+                    test_case = f"{emoji} **Test case #{n + 1}**"
                     failed = False
-                
+
+
                 if none_failed and failed:
                     none_failed = False
-
-                embed.add_field(
-                    name=f"{emoji} Test Case {n+1}.",
-                    value=info,
-                    inline=False
-                )
-                pages.append(embed)
+                if not task['test_cases'][n]['hidden'] and failed: 
+                    embed = Embed(timestamp=dt.utcnow(), title=f"**{task['title']}**\n{emoji} Test case #{n + 1}")
+                    embed.set_author(
+                    name=f"{ctx.author}'s solution", icon_url=ctx.author.avatar_url
+                    )
+                    embed.description = info
+                    print("Page!")  
+                    pages.append(embed)
+                test_cases.append(test_case)
                 
-            # if none_failed:
-            #     await ctx.message.add_reaction(Emoji.Execution.successful)
-            # else:
-            #     await ctx.message.add_reaction(Emoji.Execution.error)
+
+ 
+            print(pages)
+            color = DiscordColor.green() if none_failed else DiscordColor.red()
+            main_page = Embed(timestamp=dt.utcnow(), title=f"**{task['title']}**\nTest results {passed_count}/{len(task['test_cases'])}\n\n", color=color) 
+            main_page.set_author(name=f"{ctx.message.author}'s solution", icon_url=ctx.message.author.avatar_url)
+            main_page.description = "\n".join(test_cases)
+
+            
+            pages.insert(0, main_page)
             await message.delete()
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
