@@ -16,7 +16,7 @@ IDE_LINK = "https://ide.judge0.com/"
 AUTH_HEADER = env['AUTH_HEADER'] if 'AUTH_HEADER' in env else 'X-RapidAPI-Key'
 AUTH_KEY = env['AUTH_KEY'] if 'AUTH_KEY' in env else ''
 
-PREFIX = ":"
+PREFIX = ";"
 
 # output embed limits
 NEWLINES_LIMIT = 10 
