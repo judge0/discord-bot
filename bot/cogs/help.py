@@ -62,21 +62,22 @@ class Help(commands.Cog):
                 ),
                 inline=False,
             )
-            first_page.add_field(
-                name=f"{PREFIX}workers",
-                value=(
-                    "Sends workers health check information\n"
-                    "Workers do the job of running untrusted programs in sandboxed environment."
-                ),
-                inline=False,
-            )
-            first_page.add_field(
-                name=f"{PREFIX}system",
-                value=(
-                    "Sends detailed information about system on which Judge0 API is running.\n"
-                ),
-                inline=False,
-            )
+
+            # first_page.add_field(
+            #     name=f"{PREFIX}workers",
+            #     value=(
+            #         "Sends workers health check information\n"
+            #         "Workers do the job of running untrusted programs in sandboxed environment."
+            #     ),
+            #     inline=False,
+            # )
+            # first_page.add_field(
+            #     name=f"{PREFIX}system",
+            #     value=(
+            #         "Sends detailed information about system on which Judge0 API is running.\n"
+            #     ),
+            #     inline=False,
+            # )
             await ctx.send(embed=first_page)
 
     @commands.command()

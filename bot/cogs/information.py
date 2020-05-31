@@ -70,33 +70,33 @@ class Information(commands.Cog):
 
 
 
-    @commands.command(aliases=["sys"])
-    async def system(self, ctx):
-        """Returns info about system on which Judge0 API is running."""
-        base_url = f"{BASE_URL}/system_info"
+    # @commands.command(aliases=["sys"])
+    # async def system(self, ctx):
+    #     """Returns info about system on which Judge0 API is running."""
+    #     base_url = f"{BASE_URL}/system_info"
 
-        async with aiohttp.ClientSession() as cs:
-            async with cs.get(base_url) as r:
-                if r.status not in [200, 201]:
-                    await ctx.send(f"{r.status} {responses[r.status]}")
-                    return
-                data = await r.json()
+    #     async with aiohttp.ClientSession() as cs:
+    #         async with cs.get(base_url) as r:
+    #             if r.status not in [200, 201]:
+    #                 await ctx.send(f"{r.status} {responses[r.status]}")
+    #                 return
+    #             data = await r.json()
 
-        alist = [list(data)[x : x + 5] for x in range(0, len(data), 5)]
-        pages = list()
+    #     alist = [list(data)[x : x + 5] for x in range(0, len(data), 5)]
+    #     pages = list()
 
-        for item in alist:
-            embed = Embed(timestamp=dt.utcnow(), title="System Info")
-            embed.set_author(
-                name=f"{ctx.author} request", icon_url=ctx.author.avatar_url
-            )
+    #     for item in alist:
+    #         embed = Embed(timestamp=dt.utcnow(), title="System Info")
+    #         embed.set_author(
+    #             name=f"{ctx.author} request", icon_url=ctx.author.avatar_url
+    #         )
 
-            for k in item:
-                embed.add_field(name=k, value=data[k], inline=False)
-            pages.append(embed)
+    #         for k in item:
+    #             embed.add_field(name=k, value=data[k], inline=False)
+    #         pages.append(embed)
 
-        paginator = Paginator(self.bot, ctx, pages, 30)
-        await paginator.run()
+    #     paginator = Paginator(self.bot, ctx, pages, 30)
+    #     await paginator.run()
 
     @commands.command()
     async def languages(self, ctx):

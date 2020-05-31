@@ -1,6 +1,7 @@
 """
 Cog for executing source code from Discord channel chat message.
 """
+import asyncio 
 
 import re
 import json
@@ -15,7 +16,7 @@ from discord import Embed, Color
 
 
 from typing import Optional, List
-from bot.constants import AUTH_HEADER, AUTH_KEY, BASE_URL, LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
+from bot.constants import AUTH_HEADER, AUTH_KEY, BASE_URL, LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, IDE_LINK, PREFIX
 
 
 class Execution(commands.Cog):
@@ -54,7 +55,6 @@ class Execution(commands.Cog):
             Language name, icon and version.
             Datetime of the execution.
         """
-        ide_link = "https://ide.judge0.com/?"
         color = Color.green() if description == "Accepted" else Color.red()
 
         embed = Embed(colour=color, timestamp=datetime.utcnow())
@@ -62,9 +62,7 @@ class Execution(commands.Cog):
 
 
         output = Execution.concat_output(stdout, stderr, compile_output)
-        embed = Execution.resize_output_for_embed(output, embed)
-
-        embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
+        embed = Execution.resize_output_for_embed(output, embed, token)
 
         if time:
             embed.add_field(name="Time", value=f"{time} s")
@@ -113,8 +111,6 @@ class Execution(commands.Cog):
             if is error it sends the error
             otherwise it creates an embed for the output and sends it in the same chat
         """
-        print(lang)
-        print(code)
 
         if code == None:
             await ctx.send(embed=self.__create_how_to_pass_embed(lang))
@@ -171,8 +167,6 @@ class Execution(commands.Cog):
         lang_id = LANGUAGES['ids'][str(ctx.invoked_with)]
         lang = LANGUAGES['array'][lang_id]
         lang.update({'id': lang_id})
-        print(lang, lang_id)
-        # lang['id'] = lang_id
 
         await self.__execute_code(ctx, lang, code)
         # if ctx.invoked_subcommand is None:
@@ -208,36 +202,35 @@ class Execution(commands.Cog):
         return output
     
     @staticmethod
-    def resize_output_for_embed(output, embed):
+    def resize_output_for_embed(output, embed, token):
         """
         Resizes the output for the embed if it is too large.
         Too large if it contains a lot of characters or a lot of new lines.
         This prevents abuse of large output which annoying for the users in the chat.
         """
         if len(output) > 300 or output.count("\n") > 10:
-            embed.description = f"Output too large - [Full output]({ide_link}{token})"
+            embed.description = f"Output too large - [Full output]({IDE_LINK}?{token})"
 
             if output.count("\n") > 10:
                 output = "\n".join(output.split("\n")[:10]) + "\n(...)"
             else:
                 output = output[:300] + "\n(...)"
         else:
-            embed.description = f"Edit this code in an online IDE - [here]({ide_link}{token})"
+            embed.description = f"Edit this code in an online IDE - [here]({IDE_LINK}?{token})"
+
+        embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
         return embed
     
     @staticmethod
     async def wait_submission(cs, base_url, token: str, headers: dict) -> dict:
-         
-        char = '?' if not batch else '&' 
         while True:
-            submission = await cs.get(f"{base_url}{token}{char}base64_encoded=true", headers=headers)
+            submission = await cs.get(f"{base_url}{token}?base64_encoded=true", headers=headers)
             if submission.status not in [200, 201]:
                 return f"{submission.status} {responses[submission.status]}"
 
             data = await submission.json()
-            else:
-                if data["status"]["id"] not in [1, 2]:
-                    break
+            if data["status"]["id"] not in [1, 2]:
+                break
         return data
 
     @staticmethod
@@ -249,7 +242,10 @@ class Execution(commands.Cog):
         """
         base_url = f"{BASE_URL}/submissions/"
         payload = Execution.prepare_paylad(source_code, language_id, stdin)
-        headers = {AUTH_HEADER: AUTH_KEY}
+        headers = {
+            'X-RapidAPI-Host': 'judge0.p.rapidapi.com',
+            AUTH_HEADER: AUTH_KEY,
+            }    
         
         async with aiohttp.ClientSession() as cs:
             async with cs.post(f"{base_url}?base64_encoded=true",
@@ -258,10 +254,11 @@ class Execution(commands.Cog):
 
                 if r.status not in [200, 201]:
                     return f"{r.status} {responses[r.status]}"
+                
                 res = await r.json()
             token = res["token"]
-
             data = await Execution.wait_submission(cs, base_url, token, headers)
+
         data["token"] = token
         data.update(payload)
         return data
