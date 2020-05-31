@@ -2,10 +2,17 @@
 Includes a lot of useful constants that are used in the bot.
 """
 
+from os import environ as env
+
 from datetime import datetime as dt
 from dataclasses import dataclass
 
 from discord import Colour
+
+
+BASE_URL = 'https://api.judge0.com'
+AUTH_HEADER = env['AUTH_HEADER'] if 'AUTH_HEADER' in env else 'X-Auth-Token'
+AUTH_KEY = env['AUTH_KEY'] if 'AUTH_KEY' in env else ''
 
 PREFIX = ":"
 
@@ -21,6 +28,8 @@ JUDGE0_GUILD = 620615182116323328
 JUDGE0_JOIN_CHANNEL = 623949481167290410
 JUDGE0_TEAM = [365859941292048384, 512551605321596928]
 JUDGE0_ICON = "https://i.imgur.com/Nab2jCa.png"
+
+
 
 
 LANGUAGES = {
