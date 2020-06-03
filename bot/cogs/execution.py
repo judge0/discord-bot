@@ -15,11 +15,11 @@ from discord import Embed, Color
 
 
 from typing import Optional, List
-from bot.constants import AUTH_HEADER, AUTH_KEY, LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
+from bot.constants import AUTH_HEADER, AUTH_KEY, BASE_URL, LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, IDE_LINK, Emoji, PREFIX
 
 
 class Execution(commands.Cog):
-    """
+    """ 
     Represents a Cog for executing source codes.
     """
 
@@ -67,9 +67,7 @@ class Execution(commands.Cog):
 
 
         output = Execution.concat_output(stdout, stderr, compile_output)
-        embed = Execution.resize_output_for_embed(output, embed)
-
-        embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)
+        embed = Execution.resize_output_for_embed(output, embed, token)
 
         if time:
             embed.add_field(name="Time", value=f"{time} s")
@@ -212,22 +210,22 @@ class Execution(commands.Cog):
             return "No output"
         return output
     
-    @staticmethod
-    def resize_output_for_embed(output, embed):
-        """
-        Resizes the output for the embed if it is too large.
-        Too large if it contains a lot of characters or a lot of new lines.
-        This prevents abuse of large output which annoying for the users in the chat.
-        """
-        if len(output) > 300 or output.count("\n") > 10:
-            embed.description = f"Output too large - [Full output]({ide_link}{token})"
-
-            if output.count("\n") > 10:
-                output = "\n".join(output.split("\n")[:10]) + "\n(...)"
-            else:
-                output = output[:300] + "\n(...)"
-        else:
-            embed.description = f"Edit this code in an online IDE - [here]({ide_link}{token})"
+    @staticmethod	
+    def resize_output_for_embed(output, embed, token):	
+        """	
+        Resizes the output for the embed if it is too large.	
+        Too large if it contains a lot of characters or a lot of new lines.	
+        This prevents abuse of large output which annoying for the users in the chat.	
+        """	
+        if len(output) > 300 or output.count("\n") > 10:	
+            embed.description = f"Output too large - [Full output]({IDE_LINK}?{token})"	
+            if output.count("\n") > 10:	
+                output = "\n".join(output.split("\n")[:10]) + "\n(...)"	
+            else:	
+                output = output[:300] + "\n(...)"	
+        else:	
+            embed.description = f"Edit this code in an online IDE - [here]({IDE_LINK}?{token})"	
+        embed.add_field(name="Output", value=f"```yaml\n{output}```", inline=False)	
         return embed
     
     @staticmethod
@@ -258,7 +256,7 @@ class Execution(commands.Cog):
         """
         Sends submission in Judge0 API and waits for output.
         """
-        base_url = "https://api.judge0.com/submissions/"
+        base_url = f"{BASE_URL}/submissions/"
         payload = Execution.prepare_paylad(source_code, language_id, stdin)
         
         async with aiohttp.ClientSession() as cs:
@@ -280,7 +278,7 @@ class Execution(commands.Cog):
         """
         Sends batch submissions in Judge0 API and waits for output.
         """
-        base_url = "https://api.judge0.com/submissions/batch"
+        base_url = f"{BASE_URL}/submissions/batch/"
         payload = {'submissions': submissions}
         
         async with aiohttp.ClientSession() as cs:
