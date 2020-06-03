@@ -9,12 +9,21 @@ from discord import Colour
 
 PREFIX = ":"
 
+BASE_URL = env['BASE_URL'] if 'BASE_URL' in env else 'https://judge0.p.rapidapi.com'
+IDE_LINK = "https://ide.judge0.com/"
+
+AUTH_HEADER = env['AUTH_HEADER'] if 'AUTH_HEADER' in env else 'X-RapidAPI-Key'
+AUTH_KEY = env['AUTH_KEY'] if 'AUTH_KEY' in env else ''
+
+
 # output embed limits
 NEWLINES_LIMIT = 10 
 CHARACTERS_LIMIT = 300
 
 # time used for calculating uptime
 START_TIME = dt.utcnow()
+
+
 
 # some information for the Judge0 support server
 JUDGE0_GUILD = 620615182116323328
