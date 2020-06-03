@@ -15,7 +15,7 @@ from discord import Embed, Color
 
 
 from typing import Optional, List
-from bot.constants import LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
+from bot.constants import AUTH_HEADER, AUTH_KEY, LANGUAGES, NEWLINES_LIMIT, CHARACTERS_LIMIT, Emoji, PREFIX
 
 
 class Execution(commands.Cog):
@@ -23,7 +23,13 @@ class Execution(commands.Cog):
     Represents a Cog for executing source codes.
     """
 
+    headers = {
+            'X-RapidAPI-Host': 'judge0.p.rapidapi.com',
+            AUTH_HEADER: AUTH_KEY,
+        }
+
     def __init__(self, bot):
+        print(Execution.headers)
         self.bot = bot
 
     async def __create_output_embed(
@@ -230,8 +236,9 @@ class Execution(commands.Cog):
          
         char = '?' if not batch else '&' 
         while True:
-            submission = await cs.get(f"{base_url}{token}{char}base64_encoded=true")
+            submission = await cs.get(f"{base_url}{token}{char}base64_encoded=true", headers=Execution.headers)
             if submission.status not in [200, 201]:
+                print('YE', f"{submission.status} {responses[submission.status]}")
                 return f"{submission.status} {responses[submission.status]}"
 
             data = await submission.json()
@@ -244,6 +251,7 @@ class Execution(commands.Cog):
             else:
                 if data["status"]["id"] not in [1, 2]:
                     break
+        print(data)
         return data
 
     @staticmethod
@@ -257,7 +265,7 @@ class Execution(commands.Cog):
         payload = Execution.prepare_paylad(source_code, language_id, stdin)
         
         async with aiohttp.ClientSession() as cs:
-            async with cs.post(f"{base_url}?base64_encoded=true", json=payload) as r:
+            async with cs.post(f"{base_url}?base64_encoded=true", json=payload, headers=Execution.headers) as r:
                 if r.status not in [200, 201]:
                     return f"{r.status} {responses[r.status]}"
                 res = await r.json()
@@ -279,7 +287,7 @@ class Execution(commands.Cog):
         payload = {'submissions': submissions}
         
         async with aiohttp.ClientSession() as cs:
-            async with cs.post(f"{base_url}?base64_encoded=true", json=payload) as r:
+            async with cs.post(f"{base_url}?base64_encoded=true", json=payload, headers=Execution.headers) as r:
                 if r.status not in [200, 201]:
                     return f"{r.status} {responses[r.status]}"
                 res = await r.json()

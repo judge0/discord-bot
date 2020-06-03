@@ -2,6 +2,8 @@
 Includes a lot of useful constants that are used in the bot.
 """
 
+from os import environ as env
+
 from datetime import datetime as dt
 from dataclasses import dataclass
 
@@ -22,7 +24,6 @@ CHARACTERS_LIMIT = 300
 
 # time used for calculating uptime
 START_TIME = dt.utcnow()
-
 
 
 # some information for the Judge0 support server
