@@ -80,7 +80,8 @@ class Judge(commands.Cog):
 
 
             result = await Execution.get_batch_submissions(submissions=submissions)
-            print('Result', result)
+            print(result)
+
             for n, case in enumerate(result['submissions']):
                 # values to prove the oposite
                 emoji = Emoji.Execution.error

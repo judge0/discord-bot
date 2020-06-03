@@ -29,7 +29,6 @@ class Execution(commands.Cog):
         }
 
     def __init__(self, bot):
-        print(Execution.headers)
         self.bot = bot
 
     async def __create_output_embed(
@@ -238,7 +237,6 @@ class Execution(commands.Cog):
         while True:
             submission = await cs.get(f"{base_url}{token}{char}base64_encoded=true", headers=Execution.headers)
             if submission.status not in [200, 201]:
-                print('YE', f"{submission.status} {responses[submission.status]}")
                 return f"{submission.status} {responses[submission.status]}"
 
             data = await submission.json()
@@ -251,7 +249,6 @@ class Execution(commands.Cog):
             else:
                 if data["status"]["id"] not in [1, 2]:
                     break
-        print(data)
         return data
 
     @staticmethod
