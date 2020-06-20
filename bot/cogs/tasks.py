@@ -4,6 +4,7 @@ Cog for submiting and testing tasks
 
 import base64
 from datetime import datetime as dt
+from dataclasses import dataclass
 import json
 from typing import Optional
 
@@ -13,7 +14,6 @@ from bot.cogs.execution import Execution
 from bot.constants import Emoji, LANGUAGES, Color
 from bot.paginator import Paginator
 
-
 class Judge(commands.Cog):
     """
     Represents a Cog for executing tasks.
@@ -22,124 +22,139 @@ class Judge(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    
-    async def __create_output_embed():
-        pass
+    async def __check_invalid_language(self):
+        if self.language not in LANGUAGES['ids']:
+            await self.ctx.send('Invalid language is passed!')
+            return True
+        return False
+
+    async def __check_invalid_attachment(self):
+        if self.ctx.message.attachments:
+            try:
+                self.content = await self.ctx.message.attachments[0].read() 
+                self.code = content.decode('utf-8').strip()
+                return False
+            except Exception as e:
+                await self.ctx.send('Can not read this attachment!')
+                return True
+        return False 
+
+    async def __check_invalid_task(self):
+        if self.task_id not in self.data:
+            await self.ctx.send("Invalid task id!")
+            return True
+        return False
+
+    async def __show_task_description(self):
+        if not self.code: # code is not passed only task is shown
+            embed = Embed.from_dict(self.__pack_description_embed_dict(self.data,
+                                                                       self.task_id)) 
+            await self.ctx.send(embed=embed)
+            return True
+        return False
+
+    async def __send_submitted_message(self):
+        language_id = LANGUAGES['ids'][self.language]
+        user = self.ctx.message.author.mention
+        lang_sub =  LANGUAGES['array'][language_id]['version']
+        return await self.ctx.send(f"{user} submited a solution to problem {task_id} in {lang_sub}")
+
+    @commands.command()
+    async def judge_list(self, ctx, difficulty: Optional[int]):
+        with open("bot/tasks.json", encoding="utf-8") as f:
+            data = json.load(f)
+
+            tasks_chunks = self.__create_tasks_chunks(data, difficulty)
+            pages = list()
+
+            for chunk in tasks_chunks:
+                tasks = self.__concatanate_tasks_to_string(chunk)
+                pages.append(Embed.from_dict(
+                     self.__pack_tasks_embed_dict(tasks,
+                     {"name": f"{ctx.author.name}'s invoke","icon_url": str(ctx.author.avatar_url)})
+                    )
+                )
+
+        paginator = Paginator(self.bot, ctx, pages, 30)
+        await paginator.run()
 
     @commands.command()
     async def judge(self, ctx, task_id, language="python", *, code: Optional[str]):
         """Runs a judge."""
+        print('BRO?')
+        # Set arguments as attributes
+        self.ctx, self.task_id, self.language, self.code = ctx, task_id, language, code 
 
-        # Invalid language passed
-        
-        if ctx.message.attachments:
-            content = await ctx.message.attachments[0].read()
-            code = content.decode('utf-8').strip()
-
-        if language not in LANGUAGES['ids']:
-            await ctx.send('Invalid language is passed!')
+        # Perform checks before connecting to the data
+        if await self.__check_invalid_language():
+            return
+        print(1)
+        if await self.__check_invalid_attachment():
             return 
 
         with open("bot/tasks.json", encoding="utf-8") as f:
-            data = json.load(f)
-
-            if task_id == 'list':
-                await ctx.send('\n'.join(f'`{i}` **{data[i]["title"]}**: difficulty ({data[i]["difficulty"]})'for i in data if i != 'authors'))
-                return
+            self.data = json.load(f)
             
-            # invalid task id is inputed
-            if task_id not in data:
-                await ctx.send("Invalid task id!")
+            # invalid task id is inputed and stop
+            if self.__check_invalid_task():
                 return
 
-            task = data[task_id]
-            if not code: # code is not passed only task is shown
-                embed = Embed.from_dict(self.__pack_description_embed_dict(data, task_id)) 
-                await ctx.send(embed=embed)
+            # show only the task and stop
+            if self.__show_task_description():
                 return
+            # get the current task
+            task = self.data[task_id]
 
+            # strip the source code that is passed  
             code = Execution.strip_source_code(code)
-            none_failed = True
-            pages = list()
-            embed = None
-            passed_count = int()
-            submissions = list()
-            test_cases = list()
 
-            await ctx.message.delete()
+            # initialize variables
+            pages = test_cases = list()
+            embed, none_failed, passed_count = None, True, int()
 
-            language_id = LANGUAGES['ids'][language]
-            message = await ctx.send(f"{ctx.message.author.mention} submited a solution to problem {task_id} in {LANGUAGES['array'][language_id]['version']}")
-
-            for n, case in enumerate(task['test_cases']):
-                submissions.append(Execution.prepare_paylad(source_code=code,
-                                                            language_id=LANGUAGES['ids'][language],
-                                                            stdin='\n'.join(case['inputs']),
-                                                            expected_output=case['output']))
-
-
-
+            # delete the message of the user 
+            await ctx.message.delete() # we don't want others to see the code
+            message = await self.__send_submitted_message()
+            # send information message that submission is passed (delete after)
+            submissions = self.__create_submissions(tasks)
             result = await Execution.get_batch_submissions(submissions=submissions)
-            print(result)
 
+            
+            # iterate all test cases of the submission    
             for n, case in enumerate(result['submissions']):
-                # values to prove the oposite
-                emoji = Emoji.Execution.error
-                failed = True
-
                 output = str()
                 if case['stdout']:  
                     output = base64.b64decode(case["stdout"].encode()).decode().strip()
 
-                trimed_output = output
-                if trimed_output.count("\n") > 10:
-                    trimed_output = "(...)\n" + "\n".join(trimed_output.split("\n")[:10])
-                if len(output) > 300:
-                    trimed_output = "(...)\n" + trimed_output[:300]
-                
+                test_case_dict = self.__format_test_case(task, case, output)
 
-                test_case = f"{emoji} **Test case #{n + 1}**"
-                if task['test_cases'][n]['hidden']:
-                    test_case += " (Hidden)"
+                test_case = test_case_dict['test_case']
+                info = test_case_dict['info']
+                failed = test_case_dict['failed']
 
-                if case['compile_output']:
-                    info = base64.b64decode(case["compile_output"].encode()).decode().strip()    
-                elif case['stderr']:
-                    info = base64.b64decode(case["stderr"].encode()).decode().strip()
-                elif output != task['test_cases'][n]['output']:
-                    test_input = '\n'.join(task['test_cases'][n]['inputs'])
-                    info = (
-                            f"**On input:**\n"
-                            f"{test_input}\n"
-                            f"**Expected:**\n"
-                            f"{task['test_cases'][n]['output']}\n"
-                            f"**Got:**\n{trimed_output}"
-                            )
-                        
-                else:
+                if not failed: 
                     passed_count += 1
-                    emoji = Emoji.Execution.successful
-                    test_case = f"{emoji} **Test case #{n + 1}**"
-                    failed = False
-
 
                 if none_failed and failed:
                     none_failed = False
+
                 if not task['test_cases'][n]['hidden'] and failed: 
-                    embed = Embed(timestamp=dt.utcnow(), title=f"**{task['title']}**\n{emoji} Test case #{n + 1}")
-                    embed.set_author(
-                    name=f"{ctx.author}'s solution", icon_url=ctx.author.avatar_url
-                    )
-                    embed.description = info
-                    print("Page!")  
+
+                    title = f"**{task['title']}**\n{emoji} Test case #{n + 1}"
+                    author =  {"name": f"{ctx.author.name}'s invoke",
+                               "icon_url": str(ctx.author.avatar_url)}
+                    embed = Embed.from_dict(self.__pack_failed_case_embed_dict())
+
                     pages.append(embed)
                 test_cases.append(test_case)
-                
 
- 
-            print(pages)
             color = DiscordColor.green() if none_failed else DiscordColor.red()
-            main_page = Embed(timestamp=dt.utcnow(), title=f"**{task['title']}**\nTest results {passed_count}/{len(task['test_cases'])}\n\n", color=color) 
+
+            main_page = Embed(timestamp=dt.utcnow(),
+                              title=(f"**{task['title']}**\n"
+                                     f"Test results {passed_count}/"
+                                     f"{len(task['test_cases'])}\n\n"),
+                             color=color) 
             main_page.set_author(name=f"{ctx.message.author}'s solution", icon_url=ctx.message.author.avatar_url)
             main_page.description = "\n".join(test_cases)
 
@@ -150,12 +165,35 @@ class Judge(commands.Cog):
             await paginator.run()
 
     @staticmethod
-    def __get_language_id(language: str) -> int:
-        pass    
- 
+    def __create_submissions(tasks: dict) -> list:
+        submissions = list()
+        for n, case in enumerate(task['test_cases']):
+            submissions.append(Execution.prepare_paylad(source_code=code,
+                                                        language_id=LANGUAGES['ids'][language],
+                                                        stdin='\n'.join(case['inputs']),
+                                                        expected_output=case['output']))
+        return submissions
+
+    @staticmethod
+    def __create_tasks_chunks(data: dict, difficulty: int) -> list:
+        lst = [(k, v) for k, v in data.items() if k != 'authors']  
+
+        if difficulty:
+            lst = list(filter(lambda x: x[1]["difficulty"] == difficulty, lst))     
+
+        return [lst[i:i + 10] for i in range(0, len(lst), 10)]
+
+    @staticmethod
+    def __concatanate_tasks_to_string(chunk: list) -> str:
+        tasks = str()
+        d = "difficulty"
+        
+        for e in chunk:
+            tasks += f"`{e[0]}` **{e[1]['title']}**: {d} {e[1][d]}\n"
+        return tasks
+
     @staticmethod        
     def __pack_description_embed_dict(data: dict, task_id: str) -> dict:
-
         task = data[task_id]
         embed_dict = {
             "title": task["title"],
@@ -173,12 +211,70 @@ class Judge(commands.Cog):
 
         }
         return embed_dict
-            
-            # code = Execution.strip_source_code(code)
-            # submission = await self.get_submission(code, lang.id, stdin="\n".join())
 
-        # await self.__execute_code(ctx, Lang.TypeScript, code)
+    @staticmethod
+    def __pack_tasks_embed_dict(tasks_str: str, author: dict) -> dict:
+        embed_dict = {
+            "title": "Problem solving tasks in Judge",
+            "description": tasks_str,
+            "author": {
+                **author
+            }
+        }
+        return embed_dict
 
-    
+    @staticmethod
+    def __pack_failed_case_embed_dict(title: str, author: dict,  info: str) -> dict:
+        embed_dict = {
+            'timestamp': dt.utcnow(),
+            'title': title,
+            'description': info,
+            'author': {
+                **author
+            }   
+        } 
+        return embed_dict
+
+    @staticmethod
+    def __trim_output(output: str) -> str:
+        if output.count("\n") > 10:
+            output = "(...)\n" + "\n".join(output.split("\n")[:10])
+        if len(output) > 300:
+            output = "(...)\n" + output[:300]
+        return output
+
+    @staticmethod
+    def __format_test_case(task: dict, case: dict, output: str) -> dict:
+        trimed_output = self.__trim_output(output)
+
+        emoji = Emoji.Execution.error
+        failed = True
+        test_case = f"{emoji} **Test case #{n + 1}**"
+        if task['test_cases'][n]['hidden']:
+            test_case += " (Hidden)"
+
+        if case['compile_output']:
+            info = base64.b64decode(case["compile_output"].encode()).decode().strip()    
+        elif case['stderr']:
+            info = base64.b64decode(case["stderr"].encode()).decode().strip()
+        elif output != task['test_cases'][n]['output']:
+            test_input = '\n'.join(task['test_cases'][n]['inputs'])
+            info = (
+                    f"**On input:**\n"
+                    f"{test_input}\n"
+                    f"**Expected:**\n"
+                    f"{task['test_cases'][n]['output']}\n"
+                    f"**Got:**\n{trimed_output}"
+                    )
+        else:
+            emoji = Emoji.Execution.successful
+            test_case = f"{emoji} **Test case #{n + 1}**"
+            failed = False
+
+        return {'test_case': test_case,
+                'info': info,
+                'failed': failed}
+                
+
 def setup(bot):
     bot.add_cog(Judge(bot))
