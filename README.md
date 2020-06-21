@@ -6,7 +6,7 @@
 <h1 align="center">
 Judge0Bot
 </h1>
-<h4 align="center">Code execution in the chat</h4>
+<h4 align="center">Code execution in Discord chat</h4>
 
 
 
@@ -37,29 +37,26 @@ Judge0Bot
 
 # Overview
 **Judge0Bot** is a Discord bot for interacting with the [Judge0 API](https://api.judge0.com/).
-It executes source code of near 20 programming languages directly in the Discord channel chat.
+It executes code from nearly 20 programming languages directly in your Discord server.
 
 # Get to the bot
-The bot is hosted and this means that you can use its commands from a Discord server.
-Three of the ways of interacting with our bot in the Discord platform:
+The bot is hosted and this means that you can use its commands in  a Discord server.
+There are three ways of interacting with our bot on Discord:
 
-1. **Invite the bot in your server**.
-    You can invite the bot in servers which you manage with this [invite link.](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)
-1. **Use the bot from our support server**.
-    You can use the bot from our Judge0 support server. Join the server [here.]()
-1. **Use the bot from programming servers.**
-    The bot is included in large IT related communties.
-    [discord.py](https://discord.gg/r3sSKJJ), [ITBG](http://discord.gg/dRrdYQf)
+1. **Add the bot to your own server**.
+    You can add the bot to servers where you have the Manage Server permmision with [this link.](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)
+1. **Use the bot in our support server**.
+    You can use the bot in the Judge0 support server. Join the server [here.]()
+1. **Use the bot in major programming servers.**
+    The bot is included in large IT related communties like [discord.py](https://discord.gg/r3sSKJJ) and [ITBG](http://discord.gg/dRrdYQf)!
     
 # Usage
-The bot is quite easy and straightforward for use. There is integrated
-help command in the bot. Send `;help` in the chat and the bot will send helpful
-information for usage.
+The bot is quite easy to use. Send `;help` in the chat and the bot will give you helpful information for usage.
 
 #### Executing code
-The code execution is done through sending a language command and passing the source code.
-You can view all language commands after sending `;languages` in the chat.
-Every language command have three use cases (Python example):
+Code execution is done through sending a language command with the code you want to execute.
+You can view all supported languages by sending `;languages` in the chat.
+Every language command has three use cases (Python is used here as an example):
 
 <br>
 
@@ -68,7 +65,7 @@ Every language command have three use cases (Python example):
   <img src="https://i.imgur.com/Enafvtn.png" width="256">
 </p>
 
-This command will execute the passed source code and it will return an output embed which includes information like time and memory usage and output which includes standart output, standart error, compiler message and sandbox message if any.
+This command executes the code provided andreturns an embed which includes information like the time it took to execute, memory usage and the code's output including standart output, standart error, compiler messages and sandbox messages (if any).
 
 <br>
 
@@ -78,7 +75,7 @@ This command will execute the passed source code and it will return an output em
 </p>
 
 
-If a language command is send without source code it will return an useful guide how to pass the source code. There are three methods: passing source code in plain format, passing soure code in code block or passing source code in highlighted code block.
+If a language command is sebt without any code it will return an useful guide on how to pass the code. There are three methods: passing the code in plain text, passing the code in a code block or passing the code in a highlighted code block.
 
 <br>
 
@@ -88,22 +85,22 @@ If a language command is send without source code it will return an useful guide
 </p>
 
 
-If argument `-v` is passed instead of source code it will return the version of the language.
+If `-v` is passed instead of source code it will return the version of the language Judge0 is using.
 
 # Development
-It is highly preferable if you don't run an instance of this bot unless you want to contribute.
+*It is highly prefered if you don't run an instance of this bot unless you want to contribute.*
 
 The installation and running steps are as follows:
 
 1. **Make sure to get git and Python 3.6 or higher**
 
-This is required to clone the repository and actually run the bot.
+This is required to clone the repository and run the bot.
 
 2. **Clone the repository**
 
 `git clone https://github.com/judge0/discord-bot.git`
 
-3. **Enter the directory**
+3. **Go to the directory**
 
 `cd discord-bot`
 
@@ -111,7 +108,7 @@ This is required to clone the repository and actually run the bot.
 
 `python -m pip install pipenv`
 
-5. **Install dependencies**
+5. **Install the required dependencies**
 
 `pipenv install --dev`
 
@@ -121,6 +118,6 @@ Bot token passed like command-line argument:
 
 `pipenv run start <token>`
 
-Bot token set as enviorment variable **BOT_TOKEN**:
+Bot token set as enviorment variable (**BOT_TOKEN**):
 
 `pipenv run start`
