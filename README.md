@@ -46,7 +46,7 @@ There are three ways of interacting with our bot on Discord:
 1. **Add the bot to your own server**.
     You can add the bot to servers where you have the Manage Server permmision with [this link.](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)
 1. **Use the bot in our support server**.
-    You can use the bot in the Judge0 support server. Join the server [here.]()
+    You can use the bot in the Judge0 support server. Join the server [here.](https://discord.gg/6dvxeA8)
 1. **Use the bot in major programming servers.**
     The bot is included in large IT related communties like [discord.py](https://discord.gg/r3sSKJJ) and [ITBG](http://discord.gg/dRrdYQf)!
     
