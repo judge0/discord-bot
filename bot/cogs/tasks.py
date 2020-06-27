@@ -57,7 +57,7 @@ class Judge(commands.Cog):
         language_id = LANGUAGES['ids'][self.language]
         user = self.ctx.message.author.mention
         lang_sub =  LANGUAGES['array'][language_id]['version']
-        return await self.ctx.send(f"{user} submited a solution to problem {task_id} in {lang_sub}")
+        return await self.ctx.send(f"{user} submited a solution to problem {self.task_id} in {lang_sub}")
 
     @commands.command()
     async def judge_list(self, ctx, difficulty: Optional[int]):
@@ -81,14 +81,13 @@ class Judge(commands.Cog):
     @commands.command()
     async def judge(self, ctx, task_id, language="python", *, code: Optional[str]):
         """Runs a judge."""
-        print('BRO?')
         # Set arguments as attributes
         self.ctx, self.task_id, self.language, self.code = ctx, task_id, language, code 
 
         # Perform checks before connecting to the data
-        if await self.__check_invalid_language():
+        if (await self.__check_invalid_language()):
             return
-        print(1)
+
         if await self.__check_invalid_attachment():
             return 
 
@@ -96,37 +95,37 @@ class Judge(commands.Cog):
             self.data = json.load(f)
             
             # invalid task id is inputed and stop
-            if self.__check_invalid_task():
+            if await self.__check_invalid_task():
                 return
 
             # show only the task and stop
-            if self.__show_task_description():
+            if await self.__show_task_description():
                 return
             # get the current task
-            task = self.data[task_id]
+            task = self.data[self.task_id]
 
             # strip the source code that is passed  
             code = Execution.strip_source_code(code)
 
             # initialize variables
-            pages = test_cases = list()
-            embed, none_failed, passed_count = None, True, int()
+            pages, test_cases = list(), list()
+            passed_count = int()
 
             # delete the message of the user 
             await ctx.message.delete() # we don't want others to see the code
-            message = await self.__send_submitted_message()
             # send information message that submission is passed (delete after)
-            submissions = self.__create_submissions(tasks)
+            message = await self.__send_submitted_message()
+            
+            submissions = self.__create_submissions(task, code, language)
             result = await Execution.get_batch_submissions(submissions=submissions)
 
-            
-            # iterate all test cases of the submission    
+            # iterate all test cases of the result of the submissions
             for n, case in enumerate(result['submissions']):
                 output = str()
                 if case['stdout']:  
                     output = base64.b64decode(case["stdout"].encode()).decode().strip()
 
-                test_case_dict = self.__format_test_case(task, case, output)
+                test_case_dict = self.__eval_test_case(n, task, case, output)
 
                 test_case = test_case_dict['test_case']
                 info = test_case_dict['info']
@@ -135,37 +134,75 @@ class Judge(commands.Cog):
                 if not failed: 
                     passed_count += 1
 
-                if none_failed and failed:
-                    none_failed = False
-
                 if not task['test_cases'][n]['hidden'] and failed: 
-
-                    title = f"**{task['title']}**\n{emoji} Test case #{n + 1}"
-                    author =  {"name": f"{ctx.author.name}'s invoke",
-                               "icon_url": str(ctx.author.avatar_url)}
-                    embed = Embed.from_dict(self.__pack_failed_case_embed_dict())
-
-                    pages.append(embed)
+                    pages.append(self.__create_page(task))
                 test_cases.append(test_case)
 
-            color = DiscordColor.green() if none_failed else DiscordColor.red()
-
+            color = DiscordColor.green() if n + 1 == passed_count else DiscordColor.red()
             main_page = Embed(timestamp=dt.utcnow(),
                               title=(f"**{task['title']}**\n"
                                      f"Test results {passed_count}/"
                                      f"{len(task['test_cases'])}\n\n"),
-                             color=color) 
+                             color=color)
+
+            
             main_page.set_author(name=f"{ctx.message.author}'s solution", icon_url=ctx.message.author.avatar_url)
             main_page.description = "\n".join(test_cases)
 
-            
+            if len(pages) == 0:
+                await ctx.send(embed=main_page)
+                return 
+
             pages.insert(0, main_page)
             await message.delete()
             paginator = Paginator(self.bot, ctx, pages, 30)
             await paginator.run()
 
+
+    def __eval_test_case(self, n: int, task: dict, case: dict, output: str) -> dict:
+        trimed_output = self.__trim_output(output)
+        info = str()
+
+        emoji = Emoji.Execution.error
+        failed = True
+        test_case = f"{emoji} **Test case #{n + 1}**"
+        if task['test_cases'][n]['hidden']:
+            test_case += " (Hidden)"
+
+        if case['compile_output']:
+            info = base64.b64decode(case["compile_output"].encode()).decode().strip()    
+        elif case['stderr']:
+            info = base64.b64decode(case["stderr"].encode()).decode().strip()
+        elif output != task['test_cases'][n]['output']:
+            test_input = '\n'.join(task['test_cases'][n]['inputs'])
+            info = (
+                    f"**On input:**\n"
+                    f"{test_input}\n"
+                    f"**Expected:**\n"
+                    f"{task['test_cases'][n]['output']}\n"
+                    f"**Got:**\n{trimed_output}"
+                    )
+        else:
+            emoji = Emoji.Execution.successful
+            test_case = f"{emoji} **Test case #{n + 1}**"
+            failed = False
+
+        return {'test_case': test_case,
+                'info': info,
+                'failed': failed}
+
+    def __create_page(self, task: dict):
+        emoji = Emoji.Execution.error
+        title = f"**{task['title']}**\n{emoji} Test case #{n + 1}"
+        author =  {"name": f"{self.ctx.author.name}'s invoke",
+                    "icon_url": str(self.ctx.author.avatar_url)}
+
+        page = Embed.from_dict(self.__pack_failed_case_embed_dict(title,
+                                                                  author,
+                                                                  info))
+        return page
     @staticmethod
-    def __create_submissions(tasks: dict) -> list:
+    def __create_submissions(task: dict, code: str, language: str) -> list:
         submissions = list()
         for n, case in enumerate(task['test_cases']):
             submissions.append(Execution.prepare_paylad(source_code=code,
@@ -226,7 +263,6 @@ class Judge(commands.Cog):
     @staticmethod
     def __pack_failed_case_embed_dict(title: str, author: dict,  info: str) -> dict:
         embed_dict = {
-            'timestamp': dt.utcnow(),
             'title': title,
             'description': info,
             'author': {
@@ -242,38 +278,6 @@ class Judge(commands.Cog):
         if len(output) > 300:
             output = "(...)\n" + output[:300]
         return output
-
-    @staticmethod
-    def __format_test_case(task: dict, case: dict, output: str) -> dict:
-        trimed_output = self.__trim_output(output)
-
-        emoji = Emoji.Execution.error
-        failed = True
-        test_case = f"{emoji} **Test case #{n + 1}**"
-        if task['test_cases'][n]['hidden']:
-            test_case += " (Hidden)"
-
-        if case['compile_output']:
-            info = base64.b64decode(case["compile_output"].encode()).decode().strip()    
-        elif case['stderr']:
-            info = base64.b64decode(case["stderr"].encode()).decode().strip()
-        elif output != task['test_cases'][n]['output']:
-            test_input = '\n'.join(task['test_cases'][n]['inputs'])
-            info = (
-                    f"**On input:**\n"
-                    f"{test_input}\n"
-                    f"**Expected:**\n"
-                    f"{task['test_cases'][n]['output']}\n"
-                    f"**Got:**\n{trimed_output}"
-                    )
-        else:
-            emoji = Emoji.Execution.successful
-            test_case = f"{emoji} **Test case #{n + 1}**"
-            failed = False
-
-        return {'test_case': test_case,
-                'info': info,
-                'failed': failed}
                 
 
 def setup(bot):
