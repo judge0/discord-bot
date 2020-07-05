@@ -3,6 +3,7 @@ Includes a lot of useful constants that are used in the bot.
 """
 
 from os import environ as env
+import json
 
 from datetime import datetime as dt
 from dataclasses import dataclass
@@ -32,7 +33,7 @@ JUDGE0_JOIN_CHANNEL = 623949481167290410
 JUDGE0_TEAM = [365859941292048384, 512551605321596928]
 JUDGE0_ICON = "https://i.imgur.com/Nab2jCa.png"
 
-with open('languages.json') as f:
+with open('bot/languages.json') as f:
     LANGUAGES = json.load(f)
 
 @dataclass

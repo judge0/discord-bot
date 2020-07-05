@@ -81,6 +81,12 @@ class Admin(commands.Cog):
         )
 
     @is_team_member()
+    @commands.command()
+    async def db(self, ctx, *, arg):
+        wtf = await self.bot.db.ex(arg)
+        await ctx.send(wtf)
+
+    @is_team_member()
     @commands.command(aliases=["s"])
     async def status(self, ctx, arg):
         """Changing the bot status."""

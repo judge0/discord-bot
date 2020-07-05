@@ -124,7 +124,7 @@ GET_LAST_TASK_ID = """
 """
 # GET_LAST_TASK_ID = """
 #    SELECT *
-#    FROM authors 
+#    FROM tasks 
 # """
 def asyncinit(cls):
     """Decorator for an async instantiation of a class."""
@@ -198,13 +198,16 @@ class BotDataBase:
     async def insert_task(
         self, author_nickname: str, created_at: datetime, task_dict: dict
     ):
-        author_id = await self.__get_author_id(author_nickname)
-        task_id = await self.__get_last_task_id()
-        task = json.dumbs(task)
+        """Inserts a new task for solving into the database."""
+        author_id = await self.get_author_id(author_nickname)
 
+        task_id_str = await self.get_last_task_id()
+        task = json.dumps(task_dict)
+        task_id = str(int(task_id_str.lstrip('0')) + 1).zfill(4)
+ 
         # (task_id, author_id, created_at, task)
         args = [task_id, author_id, created_at, task]
-        await self.conn.execute(INSERT_EXECUTION, *args)
+        await self.conn.execute(INSERT_TASK, *args)
 
     async def get_author_id(self, nickname: str) -> int:
         records = await self.conn.fetch(GET_AUTHOR_ID, nickname)
@@ -214,62 +217,15 @@ class BotDataBase:
         records = await self.conn.fetch(GET_LAST_TASK_ID)
         return records[0].get('task_id')
 
-t = r"""
-    {
-    "title": "Sum two numbers",
-    "difficulty": 0,
-    "description": "Create a program which takes two numbers as an input and prints their sum.",
-    "example": "```Input:\n2\n3\nOutput:\n5```",
-    "test_cases": [
-      {
-        "inputs": [
-          "4",
-          "5"
-        ],
-        "output": "9",
-        "hidden": false
-      },
-      {
-        "inputs": [
-          "1",
-          "1"
-        ],
-        "output": "2",
-        "hidden": false
-      },
-      {
-        "inputs": [
-          "5",
-          "6"
-        ],
-        "output": "11",
-        "hidden": true
-      },
-      {
-        "inputs": [
-          "30",
-          "20"
-        ],
-        "output": "50",
-        "hidden": true
-      },
-      {
-        "inputs": [
-          "0",
-          "-5"
-        ],
-        "output": "-5",
-        "hidden": true
-      }
-    ]
-  }"""
-
+    async def ex(self, q):
+        return await self.conn.fetch(q) 
 
 async def run():
     db = await BotDataBase()
-    ta = await db.get_author_id('otherone')
-    print("This", ta)
-
+    # t = json.load(open('tasks.json', encoding='utf-8'))['0002']
+    # ta = await db.insert_task('otherone', datetime.now(), t)
+    print(await db.ex('SELECT * FROM tasks'))
+    # print(await db.get_last_task_id())
     # # Insert a record into the created table.
     # await conn.execute('''
     # INSERT INTO users (discord_id)
@@ -305,5 +261,5 @@ async def run():
     # await conn.close()
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run())
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(run())
