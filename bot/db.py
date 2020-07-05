@@ -201,9 +201,9 @@ class BotDataBase:
         """Inserts a new task for solving into the database."""
         author_id = await self.get_author_id(author_nickname)
 
-        task_id_str = await self.get_last_task_id()
+        task_id_int = await self.get_last_task_id()
         task = json.dumps(task_dict)
-        task_id = str(int(task_id_str.lstrip('0')) + 1).zfill(4)
+        task_id = str(task_id_int + 1).zfill(4)
  
         # (task_id, author_id, created_at, task)
         args = [task_id, author_id, created_at, task]
@@ -215,16 +215,33 @@ class BotDataBase:
 
     async def get_last_task_id(self) -> str:
         records = await self.conn.fetch(GET_LAST_TASK_ID)
-        return records[0].get('task_id')
+        if not records:
+            return 0
+        return int(records[0].get('task_id').lstrip('0'))
 
     async def ex(self, q):
         return await self.conn.fetch(q) 
+
+    async def upd(self):
+        with open('tasks.json', encoding='utf-8') as f:
+            data = json.load(f)
+        match = {'m6YGC': "Ийон Тихи", 'rDKSK': "Skilldeliver", 'WgGWV': "THGM", 'WfVHg': "invakid404", 'VaFVH': "ValTM", 'SimbaD': "nasko7"}
+        del data['authors']
+        
+        for k, v in data.items():
+            author = match[v['author']]
+            del data[k]['author']
+            await self.insert_task(author, datetime.now(), v)
+        return True 
+        # self.conn.execute('')
 
 async def run():
     db = await BotDataBase()
     # t = json.load(open('tasks.json', encoding='utf-8'))['0002']
     # ta = await db.insert_task('otherone', datetime.now(), t)
     print(await db.ex('SELECT * FROM tasks'))
+    # print(await db.ex('DROP TABLE tasks CASCADE'))
+    # print(await db.upd())
     # print(await db.get_last_task_id())
     # # Insert a record into the created table.
     # await conn.execute('''
@@ -261,5 +278,5 @@ async def run():
     # await conn.close()
 
 
-# loop = asyncio.get_event_loop()
-# loop.run_until_complete(run())
+loop = asyncio.get_event_loop()
+loop.run_until_complete(run())
