@@ -171,7 +171,7 @@ class Execution(commands.Cog):
         """
         The main command which handles the code execution process.
         """
-        lang_id = LANGUAGES['ids'][str(ctx.invoked_with)]
+        lang_id = str(LANGUAGES['ids'][str(ctx.invoked_with)])
         lang = LANGUAGES['array'][lang_id]
         lang.update({'id': lang_id})
         print(lang, lang_id)

@@ -181,7 +181,6 @@ LANGUAGES = {
         'emoji': '<:typescript:662723857643208716>',
         }
    },
-   #TODO make this dictionary based on "array"
     "ids": {
         'assembly': 45, 'bash': 46, 'sh': 46,
         'c': 50, 'cpp': 54, 'c++': 54, 'csharp': 51,

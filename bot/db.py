@@ -49,7 +49,7 @@ CREATE_TABLE_SOLUTIONS = """
                 FOREIGN KEY (task_id) REFERENCES tasks(task_id)
             )
 """
-    
+
 CREATE_TABLE_AUTHORS = """
     CREATE TABLE IF NOT EXISTS authors (
                 author_id SERIAL,
@@ -73,7 +73,7 @@ INSERT_DISCORD_USER = """
 INSERT_AUTHOR = """
     INSERT INTO authors (nickname, icon_url)
     VALUES ($1, $2)
-""" # asyncpg.exceptions.UniqueViolationError:
+"""  # asyncpg.exceptions.UniqueViolationError:
 
 
 INSERT_EXECUTION = """
@@ -90,7 +90,7 @@ INSERT_EXECUTION = """
 INSERT_TASK = """
     INSERT INTO tasks (task_id, author_id, created_at, task)
     VALUES ($1, $2, $3, $4)
-""" 
+"""
 
 INSERT_SOLUTION = """
     INSERT INTO solutions (user_id, task_id, test_cases_passed, created_at, lines_of_code)
@@ -109,7 +109,25 @@ UPDATE_AUTHOR_ICON_URL = """
     WHERE icon_url = $1
 """
 
+GET_AUTHOR_ID = """
+   SELECT author_id
+   FROM authors
+   WHERE nickname = $1
+   LIMIT 1
+""" 
+
+GET_LAST_TASK_ID = """
+   SELECT created_at, task_id
+   FROM tasks 
+   ORDER BY created_at DESC
+   LIMIT 1
+"""
+# GET_LAST_TASK_ID = """
+#    SELECT *
+#    FROM authors 
+# """
 def asyncinit(cls):
+    """Decorator for an async instantiation of a class."""
     __new__ = cls.__new__
 
     async def init(obj, *arg, **kwarg):
@@ -124,52 +142,78 @@ def asyncinit(cls):
     cls.__new__ = new
     return cls
 
-@asyncinit
-class BotDataBase():
-    async def __init__(self):
-        self.conn = await asyncpg.connect(user=environ['DB_USER'], password=environ['DB_PASS'].strip('"'),
-                                 database=environ['DB_NAME'], host='localhost')
-        await self.__create_tables()
 
-    def create(self):
-        pass
+@asyncinit
+class BotDataBase:
+    """
+    Represents a interface to the PostgreSQL database.
+    """
+    async def __init__(self):
+        self.conn = await asyncpg.connect(
+            user=environ["DB_USER"],
+            password=environ["DB_PASS"].strip('"'),
+            database=environ["DB_NAME"],
+            host="localhost",
+        )
+        await self.__create_tables()
 
     async def __create_tables(self) -> None:
         """Initalize the tables of the database if they don't exist."""
-        tables_queries = [CREATE_TABLE_USERS, CREATE_TABLE_AUTHORS, 
-                         CREATE_TABLE_EXECUTIONS, CREATE_TABLE_TASKS,
-                         CREATE_TABLE_SOLUTIONS
-                        ]
+        tables_queries = [
+            CREATE_TABLE_USERS,
+            CREATE_TABLE_AUTHORS,
+            CREATE_TABLE_EXECUTIONS,
+            CREATE_TABLE_TASKS,
+            CREATE_TABLE_SOLUTIONS,
+        ]
 
-        for query in tables_queries: 
-            await self.conn.execute(query)    
+        for query in tables_queries:
+            await self.conn.execute(query)
 
     async def insert_user(self, discord_id: int) -> None:
         """Inserts a user with discord user id into the database."""
         await self.conn.execute(INSERT_DISCORD_USER, *locals().values())
 
-    async def insert_author(self, nickname: str, icon_url = None) -> None:
+    async def insert_author(self, nickname: str, icon_url=None) -> None:
         """Inserts an author of task into the database."""
         await self.conn.execute(INSERT_AUTHOR, *locals().values())
 
-    async def insert_execution(self, 
-                               user_id: int,
-                               token: str, 
-                               created_at: datetime,
-                               lines_of_code: int) -> None:
-        """Insert executed info of passed source code into the database."""                       
+    async def insert_execution(
+        self, user_id: int, token: str, created_at: datetime, lines_of_code: int
+    ) -> None:
+        """Insert executed info of passed source code into the database."""
         await self.conn.execute(INSERT_EXECUTION, *locals().values())
 
-    async def insert_solution(self, user_id: int,
-                             task_id: str,
-                             test_cases_passed: List[bool],
-                             created_at: datetime, 
-                             lines_of_code: int) -> None:
+    async def insert_solution(
+        self,
+        user_id: int,
+        task_id: str,
+        test_cases_passed: List[bool],
+        created_at: datetime,
+        lines_of_code: int
+    ) -> None:
         """Inserts a solution from user to a task into the database."""
         await self.conn.execute(INSERT_SOLUTION, *locals().values())
 
+    async def insert_task(
+        self, author_nickname: str, created_at: datetime, task_dict: dict
+    ):
+        author_id = await self.__get_author_id(author_nickname)
+        task_id = await self.__get_last_task_id()
+        task = json.dumbs(task)
 
-    async def 
+        # (task_id, author_id, created_at, task)
+        args = [task_id, author_id, created_at, task]
+        await self.conn.execute(INSERT_EXECUTION, *args)
+
+    async def get_author_id(self, nickname: str) -> int:
+        records = await self.conn.fetch(GET_AUTHOR_ID, nickname)
+        return records[0].get('author_id')
+
+    async def get_last_task_id(self) -> str:
+        records = await self.conn.fetch(GET_LAST_TASK_ID)
+        return records[0].get('task_id')
+
 t = r"""
     {
     "title": "Sum two numbers",
@@ -218,12 +262,13 @@ t = r"""
         "hidden": true
       }
     ]
-  }""" 
-    
+  }"""
+
 
 async def run():
     db = await BotDataBase()
-    print(type(db))
+    ta = await db.get_author_id('otherone')
+    print("This", ta)
 
     # # Insert a record into the created table.
     # await conn.execute('''
@@ -239,8 +284,8 @@ async def run():
 
     # await conn.execute(CREATE_TABLE_SOLUTIONS)
     # await conn.execute(INSERT_SOLUTION, 365859941292048384, '0001', [False, False, False, True, False, True, True], datetime.now(), 159)
-    # # await conn.execute(INSERT_EXECUTION, 
-    # #                    365859941292053646, 
+    # # await conn.execute(INSERT_EXECUTION,
+    # #                    365859941292053646,
     # #                    'd85cd024-1548-4165-0000-7bc88673f142',
     # #                    datetime.now(),
     # #                    123)
@@ -256,8 +301,9 @@ async def run():
     # # # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
     # print(row)
 
-    # # Close the connection. 
+    # # Close the connection.
     # await conn.close()
+
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run())

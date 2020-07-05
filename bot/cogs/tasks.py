@@ -54,7 +54,7 @@ class Judge(commands.Cog):
         return False
 
     async def __send_submitted_message(self):
-        language_id = LANGUAGES['ids'][self.language]
+        language_id = str(LANGUAGES['ids'][self.language])
         user = self.ctx.message.author.mention
         lang_sub =  LANGUAGES['array'][language_id]['version']
         return await self.ctx.send(f"{user} submited a solution to problem {self.task_id} in {lang_sub}")
