@@ -6,15 +6,15 @@ import json
 
 from os import environ
 
-# class BotDataBase:
-#     def __init__(self):
-#         pass 
+class BotDataBase:
+    def __init__(self):
+        pass 
 
-#     def create(self):
-#         pass
+    def create(self):
+        pass
 
-#     def insert(self):
-#         pass
+    def insert(self):
+        pass
 
 t = r"""
     {
@@ -95,15 +95,17 @@ CREATE_TABLE_TASKS = """
             )
 """
 
-
 CREATE_TABLE_SOLUTIONS = """
     CREATE TABLE IF NOT EXISTS solutions (
+                solution_id SERIAL,
+                user_id BIGINT,
                 task_id TEXT,
                 test_cases_passed BOOL[], 
                 created_at TIMESTAMP,
                 lines_of_code INT,
-                FOREIGN KEY (task_id) REFERENCES tasks(task_id),
-
+                PRIMARY KEY (solution_id),
+                FOREIGN KEY (user_id) REFERENCES users(discord_id),
+                FOREIGN KEY (task_id) REFERENCES tasks(task_id)
             )
 """
     
@@ -149,6 +151,11 @@ INSERT_TASK = """
     VALUES ($1, $2, $3, $4)
 """ 
 
+INSERT_SOLUTION = """
+    INSERT INTO solutions (user_id, task_id, test_cases_passed, created_at, lines_of_code)
+    VALUES ($1, $2, $3, $4, $5)
+"""
+
 UPDATE_AUTHOR_NICKNAME = """
     UPDATE authors
     SET nickname = $2
@@ -176,8 +183,8 @@ async def run():
     # )
     # ''', 365859941292048386)
 
-    await conn.execute(CREATE_TABLE_TASKS)
-    await conn.execute(INSERT_TASK, '0001', 1, datetime.now(), t)
+    await conn.execute(CREATE_TABLE_SOLUTIONS)
+    await conn.execute(INSERT_SOLUTION, 365859941292048384, '0001', [False, False, False, True, False, True, True], datetime.now(), 159)
     # await conn.execute(INSERT_EXECUTION, 
     #                    365859941292053646, 
     #                    'd85cd024-1548-4165-0000-7bc88673f142',
@@ -185,14 +192,14 @@ async def run():
     #                    123)
     # # Select a row from the table.
     row = await conn.fetch(
-        'SELECT * FROM authors')
+        'SELECT * FROM solutions')
     # *row* now contains
     # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
-    print(row)
-    row = await conn.fetch(
-        'SELECT * FROM tasks')
-    # *row* now contains
-    # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
+    # print(row)
+    # row = await conn.fetch(
+    #     'SELECT * FROM tasks')
+    # # *row* now contains
+    # # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
     print(row)
 
     # Close the connection. 
