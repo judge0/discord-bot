@@ -4,68 +4,9 @@ import asyncpg
 from datetime import datetime
 import json
 
+from typing import List
 from os import environ
 
-class BotDataBase:
-    def __init__(self):
-        pass 
-
-    def create(self):
-        pass
-
-    def insert(self):
-        pass
-
-t = r"""
-    {
-    "title": "Sum two numbers",
-    "difficulty": 0,
-    "description": "Create a program which takes two numbers as an input and prints their sum.",
-    "example": "```Input:\n2\n3\nOutput:\n5```",
-    "test_cases": [
-      {
-        "inputs": [
-          "4",
-          "5"
-        ],
-        "output": "9",
-        "hidden": false
-      },
-      {
-        "inputs": [
-          "1",
-          "1"
-        ],
-        "output": "2",
-        "hidden": false
-      },
-      {
-        "inputs": [
-          "5",
-          "6"
-        ],
-        "output": "11",
-        "hidden": true
-      },
-      {
-        "inputs": [
-          "30",
-          "20"
-        ],
-        "output": "50",
-        "hidden": true
-      },
-      {
-        "inputs": [
-          "0",
-          "-5"
-        ],
-        "output": "-5",
-        "hidden": true
-      }
-    ]
-  }""" 
-    
 CREATE_TABLE_USERS = """
     CREATE TABLE IF NOT EXISTS users (
                 discord_id BIGINT NOT NULL,
@@ -167,9 +108,122 @@ UPDATE_AUTHOR_ICON_URL = """
     SET icon_url = $2
     WHERE icon_url = $1
 """
-async def run():
-    conn = await asyncpg.connect(user=environ['DB_USER'], password=environ['DB_PASS'].strip('"'),
+
+def asyncinit(cls):
+    __new__ = cls.__new__
+
+    async def init(obj, *arg, **kwarg):
+        await obj.__init__(*arg, **kwarg)
+        return obj
+
+    def new(cls, *arg, **kwarg):
+        obj = __new__(cls, *arg, **kwarg)
+        coro = init(obj, *arg, **kwarg)
+        return coro
+
+    cls.__new__ = new
+    return cls
+
+@asyncinit
+class BotDataBase():
+    async def __init__(self):
+        self.conn = await asyncpg.connect(user=environ['DB_USER'], password=environ['DB_PASS'].strip('"'),
                                  database=environ['DB_NAME'], host='localhost')
+        await self.__create_tables()
+
+    def create(self):
+        pass
+
+    async def __create_tables(self) -> None:
+        """Initalize the tables of the database if they don't exist."""
+        tables_queries = [CREATE_TABLE_USERS, CREATE_TABLE_AUTHORS, 
+                         CREATE_TABLE_EXECUTIONS, CREATE_TABLE_TASKS,
+                         CREATE_TABLE_SOLUTIONS
+                        ]
+
+        for query in tables_queries: 
+            await self.conn.execute(query)    
+
+    async def insert_user(self, discord_id: int) -> None:
+        """Inserts a user with discord user id into the database."""
+        await self.conn.execute(INSERT_DISCORD_USER, *locals().values())
+
+    async def insert_author(self, nickname: str, icon_url = None) -> None:
+        """Inserts an author of task into the database."""
+        await self.conn.execute(INSERT_AUTHOR, *locals().values())
+
+    async def insert_execution(self, 
+                               user_id: int,
+                               token: str, 
+                               created_at: datetime,
+                               lines_of_code: int) -> None:
+        """Insert executed info of passed source code into the database."""                       
+        await self.conn.execute(INSERT_EXECUTION, *locals().values())
+
+    async def insert_solution(self, user_id: int,
+                             task_id: str,
+                             test_cases_passed: List[bool],
+                             created_at: datetime, 
+                             lines_of_code: int) -> None:
+        """Inserts a solution from user to a task into the database."""
+        await self.conn.execute(INSERT_SOLUTION, *locals().values())
+
+
+    async def 
+t = r"""
+    {
+    "title": "Sum two numbers",
+    "difficulty": 0,
+    "description": "Create a program which takes two numbers as an input and prints their sum.",
+    "example": "```Input:\n2\n3\nOutput:\n5```",
+    "test_cases": [
+      {
+        "inputs": [
+          "4",
+          "5"
+        ],
+        "output": "9",
+        "hidden": false
+      },
+      {
+        "inputs": [
+          "1",
+          "1"
+        ],
+        "output": "2",
+        "hidden": false
+      },
+      {
+        "inputs": [
+          "5",
+          "6"
+        ],
+        "output": "11",
+        "hidden": true
+      },
+      {
+        "inputs": [
+          "30",
+          "20"
+        ],
+        "output": "50",
+        "hidden": true
+      },
+      {
+        "inputs": [
+          "0",
+          "-5"
+        ],
+        "output": "-5",
+        "hidden": true
+      }
+    ]
+  }""" 
+    
+
+async def run():
+    db = await BotDataBase()
+    print(type(db))
 
     # # Insert a record into the created table.
     # await conn.execute('''
@@ -183,27 +237,27 @@ async def run():
     # )
     # ''', 365859941292048386)
 
-    await conn.execute(CREATE_TABLE_SOLUTIONS)
-    await conn.execute(INSERT_SOLUTION, 365859941292048384, '0001', [False, False, False, True, False, True, True], datetime.now(), 159)
-    # await conn.execute(INSERT_EXECUTION, 
-    #                    365859941292053646, 
-    #                    'd85cd024-1548-4165-0000-7bc88673f142',
-    #                    datetime.now(),
-    #                    123)
-    # # Select a row from the table.
-    row = await conn.fetch(
-        'SELECT * FROM solutions')
-    # *row* now contains
-    # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
-    # print(row)
+    # await conn.execute(CREATE_TABLE_SOLUTIONS)
+    # await conn.execute(INSERT_SOLUTION, 365859941292048384, '0001', [False, False, False, True, False, True, True], datetime.now(), 159)
+    # # await conn.execute(INSERT_EXECUTION, 
+    # #                    365859941292053646, 
+    # #                    'd85cd024-1548-4165-0000-7bc88673f142',
+    # #                    datetime.now(),
+    # #                    123)
+    # # # Select a row from the table.
     # row = await conn.fetch(
-    #     'SELECT * FROM tasks')
+    #     'SELECT * FROM solutions')
     # # *row* now contains
     # # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
-    print(row)
+    # # print(row)
+    # # row = await conn.fetch(
+    # #     'SELECT * FROM tasks')
+    # # # *row* now contains
+    # # # asyncpg.Record(id=1, name='Bob', dob=datetime.date(1984, 3, 1))
+    # print(row)
 
-    # Close the connection. 
-    await conn.close()
+    # # Close the connection. 
+    # await conn.close()
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(run())
