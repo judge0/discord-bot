@@ -13,9 +13,12 @@ from bot.constants import PREFIX
 # main run
 async def main():
     bot = Judge0Bot(command_prefix=PREFIX)
+ 
+    # if len(sys.argv) > 1 and sys.argv[1] == 'db_init':
+    #     await bot.init_db()
+
     await bot.load_db()
-    # run the bot with the token or enviroment variable
-    token = sys.argv[1] if len(sys.argv) >= 2 else os.environ["BOT_TOKEN"]
+
     await bot.start(token)
 
 time.sleep(3)  # wait for postgres to start

@@ -1,11 +1,17 @@
 import asyncio
 import asyncpg
-
 from datetime import datetime
 import json
-
+import sys
 from typing import List
 from os import environ
+from getpass import getpass
+
+
+CREATE_DATABASE = """
+    CREATE ROLE $1 WITH LOGIN PASSWORD '$2';
+    CREATE DATABASE discord_bot WITH OWNER $1;
+"""
 
 CREATE_TABLE_USERS = """
     CREATE TABLE IF NOT EXISTS users (
@@ -209,6 +215,10 @@ class BotDataBase:
         args = [task_id, author_id, created_at, task]
         await self.conn.execute(INSERT_TASK, *args)
 
+    async def get_author_by_id(self, author_id: str) -> dict:
+        records = await self.conn.fetch(GET_AUTHOR_ID, nickname)
+        return records[0].get('author_id')
+ 
     async def get_author_id(self, nickname: str) -> int:
         records = await self.conn.fetch(GET_AUTHOR_ID, nickname)
         return records[0].get('author_id')
@@ -232,8 +242,26 @@ class BotDataBase:
             author = match[v['author']]
             del data[k]['author']
             await self.insert_task(author, datetime.now(), v)
-        return True 
-        # self.conn.execute('')
+        return True
+
+    @staticmethod
+    def initialize(self):
+        username = input('Enter your username: ')
+        password, password_confirm = '', ' '
+
+        while passwrord != password_confirm:
+            password = getpass('Enter the password: ')
+            password_confirm = getpass('Enter the password second time: ')
+
+            if password != password_confirm:
+                print("The passwords don't match. Try again.")
+
+        # sudo -u postgres -i
+        # psql -c "CREATE ROLE user WITH LOGIN PASSWORD password;"
+        # psql -c "CREATE DATABASE discord_bot WITH OWNER user;"
+        
+
+
 
 async def run():
     db = await BotDataBase()
@@ -278,5 +306,5 @@ async def run():
     # await conn.close()
 
 
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run())
+# loop = asyncio.get_event_loop()
+# loop.run_until_complete(run())

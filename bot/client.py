@@ -21,3 +21,6 @@ class Judge0Bot(commands.Bot):
  
     async def load_db(self):
         self.db = await BotDataBase()
+
+    async def init_db(self):
+        await BotDataBase.initialize()
