@@ -114,10 +114,8 @@ This is required to clone the repository and run the bot.
 
 6. **Run the bot**
 
-Bot token passed like command-line argument:
-
-`pipenv run start <token>`
-
-Bot token set as enviorment variable (**BOT_TOKEN**):
+Set the bot token as enviorment variable (**BOT_TOKEN**):
+Set the Rapid API auth key as enviorment variable (**AUTH_KEY**):
+Get your auth key from here: [Judge0 Rapid API](https://rapidapi.com/hermanzdosilovic/api/judge0)
 
 `pipenv run start`
