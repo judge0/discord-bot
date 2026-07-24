@@ -1,13 +1,17 @@
-FROM python:3.7
-RUN pip install --no-cache-dir pipenv
+FROM python:3.13-slim
 
-WORKDIR /bot
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
-COPY Pipfile* ./
-RUN pipenv install
+WORKDIR /app
 
-COPY . .
+COPY pyproject.toml README.md ./
+COPY bot ./bot
+RUN pip install --no-cache-dir . \
+    && useradd --create-home --uid 10001 judge0
 
-CMD ["pipenv", "run", "start"]
+USER judge0
 
-LABEL maintainer="Herman Zvonimir Došilović <hermanz.dosilovic@gmail.com>"
+CMD ["python", "-m", "bot"]
+
+LABEL maintainer="Herman Zvonimir Dosilovic <hermanz.dosilovic@gmail.com>"

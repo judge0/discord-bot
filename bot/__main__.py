@@ -1,25 +1,26 @@
-"""
-Main program for running the bot:
+"""Run the Judge0 Discord bot with ``python -m bot``."""
 
-python -m bot token
-"""
+import logging
 
-import os, sys
+from dotenv import load_dotenv
 
-from discord.ext import commands
-
-from bot.constants import PREFIX
-
-# create a Client object
-bot = commands.Bot(command_prefix=PREFIX)
-
-# load the bot extensions (the bot features)
-bot.load_extension("bot.cogs.admin")
-bot.load_extension("bot.cogs.execution")
-bot.load_extension("bot.cogs.help")
-bot.load_extension("bot.cogs.information")
+from bot.app import create_bot
+from bot.config import Settings
 
 
-# run the bot with the token or enviroment variable
-token = sys.argv[1] if len(sys.argv) >= 2 else os.environ["BOT_TOKEN"]
-bot.run(token)
+def main() -> None:
+    """Load configuration and connect the bot to Discord."""
+    load_dotenv()
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+    )
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("judge0").setLevel(logging.ERROR)
+    settings = Settings.from_env()
+    bot = create_bot(settings)
+    bot.run(settings.bot_token, log_handler=None)
+
+
+if __name__ == "__main__":
+    main()

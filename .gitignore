@@ -1,4 +1,10 @@
+.env
+.venv/
 .vscode/
+.pytest_cache/
+.ruff_cache/
 __pycache__/
-tasks.json
-bot.db
+*.egg-info/
+*.py[cod]
+build/
+dist/

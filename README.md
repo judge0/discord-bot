@@ -1,121 +1,122 @@
+# Judge0 Discord Bot
 
-<p align="center">
-  <img src="https://i.imgur.com/vKqLL6V.png" width="1024">
-</p>
+Judge0 Discord Bot runs source code from Discord using the official
+[Judge0 Python SDK](https://github.com/judge0/judge0-python) and native Discord
+slash commands.
 
-<h1 align="center">
-Judge0Bot
-</h1>
-<h4 align="center">Code execution in Discord chat</h4>
+## Commands
 
+- `/run language code [stdin]` executes source code. The language option has
+  autocomplete, and code can be plain text or a Markdown code block.
+- `/languages` lists Judge0 Python SDK language aliases.
+- `/help` shows a short usage guide.
+- `/info` shows the running Discord and Judge0 Python SDK versions.
 
+Example:
 
-<div align="center">
-<a href="https://github.com/Rapptz/discord.py/">
-      <img src="https://img.shields.io/badge/discord-py-blue.svg" alt="discord.py">
-</a>
-<a>
-    <img src="https://img.shields.io/github/v/tag/judge0/discord-bot" alt="Version">
-</a>
-<a href="https://github.com/ambv/black">
-    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code Style: Black">
-</a>
-<a href="https://discord.gg/6dvxeA8">
-      <img src="https://discordapp.com/api/guilds/620615182116323328/embed.png" alt="Judge0 server">
-</a>
-</div>
+```text
+/run language:python code:print(6 * 7)
+```
 
-<p align="center">
-  <a href="#overview">Overview</a>
-  •
-  <a href="#get-to-the-bot">Get to the bot</a>
-  •
-  <a href="#usage">Usage</a>
-  •
-  <a href="#development">Development</a>
-</p>
+The bot uses slash commands only. It does not need Discord's privileged
+Message Content or Server Members intents.
 
-# Overview
-**Judge0Bot** is a Discord bot for interacting with the [Judge0 API](https://api.judge0.com/).
-It executes code from nearly 20 programming languages directly in your Discord server.
+## Requirements
 
-# Get to the bot
-The bot is hosted and this means that you can use its commands in  a Discord server.
-There are three ways of interacting with our bot on Discord:
+- Python 3.10 or newer, or Docker
+- A Discord application and bot token
 
-1. **Add the bot to your own server**.
-    You can add the bot to servers where you have the Manage Server permmision with [this link.](https://discordapp.com/oauth2/authorize?client_id=620609604295852033&scope=bot&permissions=388160)
-1. **Use the bot in our support server**.
-    You can use the bot in the Judge0 support server. Join the server [here.](https://discord.gg/6dvxeA8)
-1. **Use the bot in major programming servers.**
-    The bot is included in large IT related communties like [discord.py](https://discord.gg/r3sSKJJ) and [ITBG](http://discord.gg/dRrdYQf)!
-    
-# Usage
-The bot is quite easy to use. Send `;help` in the chat and the bot will give you helpful information for usage.
+Judge0 Discord Bot intentionally uses the SDK's credential-free preview
+client. No Judge0 API key, custom endpoint, or Judge0 authentication setting
+is needed. The public preview service is rate-limited.
 
-#### Executing code
-Code execution is done through sending a language command with the code you want to execute.
-You can view all supported languages by sending `;languages` in the chat.
-Every language command has three use cases (Python is used here as an example):
+## Judge0 Server Test
 
-<br>
+The existing `.env` in this workspace already contains `BOT_TOKEN`. Add these
+settings to register commands instantly in the Judge0 server and reject
+commands anywhere except `#test-discord-bot`:
 
-`;python print("Executing source code")`
-<p align="left">
-  <img src="https://i.imgur.com/Enafvtn.png" width="256">
-</p>
+```dotenv
+DISCORD_GUILD_ID=620615182116323328
+DISCORD_CHANNEL_NAME=test-discord-bot
+```
 
-This command executes the code provided andreturns an embed which includes information like the time it took to execute, memory usage and the code's output including standart output, standart error, compiler messages and sandbox messages (if any).
+Then start the bot:
 
-<br>
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e '.[dev]'
+.venv/bin/python -m bot
+```
 
-`;python`
-<p align="left">
-  <img src="https://i.imgur.com/4zW9yd1.png" width="256">
-</p>
+In `#test-discord-bot`, run `/info`, followed by:
 
+```text
+/run language:python code:print("Judge0 Discord Bot is working")
+```
 
-If a language command is sebt without any code it will return an useful guide on how to pass the code. There are three methods: passing the code in plain text, passing the code in a code block or passing the code in a highlighted code block.
+The Discord application represented by `BOT_TOKEN` must already be installed
+in the Judge0 server. Stop any old process using the same token before starting
+this implementation, otherwise both processes can respond to Discord events.
 
-<br>
+For a private test channel, open **Edit Channel > Permissions**, add the bot
+member, and allow View Channel, Send Messages, and Embed Links. Users who test
+the bot also need Use Application Commands.
 
-`;python -v`
-<p align="left">
-  <img src="https://i.imgur.com/881hbFc.png" width="256">
-</p>
+## Your Discord Server
 
+1. Open the [Discord Developer Portal](https://discord.com/developers/applications)
+   and create or select an application.
+2. On its **Bot** page, create a bot and put its token in `.env` as
+   `BOT_TOKEN=...`. Do not commit this file.
+3. Install the app using this URL, replacing `YOUR_APPLICATION_ID` with the
+   application ID:
 
-If `-v` is passed instead of source code it will return the version of the language Judge0 is using.
+   ```text
+   https://discord.com/oauth2/authorize?client_id=YOUR_APPLICATION_ID&scope=bot%20applications.commands&permissions=19456
+   ```
 
-# Development
-*It is highly prefered if you don't run an instance of this bot unless you want to contribute.*
+   The permission value grants View Channels, Send Messages, and Embed Links.
+4. For instant command registration during setup, set your server ID as
+   `DISCORD_GUILD_ID`. You can optionally restrict the bot to one channel with
+   `DISCORD_CHANNEL_NAME`.
+5. Start the bot with `.venv/bin/python -m bot` or Docker Compose.
 
-The installation and running steps are as follows:
+Remove `DISCORD_GUILD_ID` and `DISCORD_CHANNEL_NAME` for a public deployment.
+On the next start, commands are registered globally. Discord guild command
+updates are immediate; global command updates can take longer to appear.
 
-1. **Make sure to get git and Python 3.6 or higher**
+Optional bot settings:
 
-This is required to clone the repository and run the bot.
+```dotenv
+MAX_CONCURRENT_SUBMISSIONS=4
+SUBMISSION_TIMEOUT_SECONDS=30
+```
 
-2. **Clone the repository**
+## Docker
 
-`git clone https://github.com/judge0/discord-bot.git`
+The Compose service reads `.env` automatically:
 
-3. **Go to the directory**
+```bash
+docker compose up --build -d
+docker compose logs -f bot
+```
 
-`cd discord-bot`
+Stop it with `docker compose down`.
 
-4. **Install Pipenv**
+## Development
 
-`python -m pip install pipenv`
+```bash
+python3 -m venv .venv
+.venv/bin/pip install -e '.[dev]'
+.venv/bin/ruff check .
+.venv/bin/pytest
+```
 
-5. **Install the required dependencies**
+The Judge0 Python SDK is synchronous internally. Judge0 Discord Bot executes it on
+bounded worker threads so Discord's event loop remains responsive, and applies
+a submission timeout before responding to the interaction.
 
-`pipenv install --dev`
+## License
 
-6. **Run the bot**
-
-Set the bot token as enviorment variable (**BOT_TOKEN**):
-Set the Rapid API auth key as enviorment variable (**AUTH_KEY**):
-Get your auth key from here: [Judge0 Rapid API](https://rapidapi.com/hermanzdosilovic/api/judge0)
-
-`pipenv run start`
+[MIT](LICENSE)
