@@ -4,6 +4,8 @@ Judge0 Discord Bot runs source code from Discord using the official
 [Judge0 Python SDK](https://github.com/judge0/judge0-python) and native Discord
 slash commands.
 
+[Add Judge0 Discord Bot to your server](https://discord.com/oauth2/authorize?client_id=620609604295852033)
+
 ## Commands
 
 - `/run language code [stdin]` executes source code. The language option has
