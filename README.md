@@ -86,6 +86,68 @@ Remove `DISCORD_GUILD_ID` and `DISCORD_CHANNEL_NAME` for a public deployment.
 On the next start, commands are registered globally. Discord guild command
 updates are immediate; global command updates can take longer to appear.
 
+## Concurrent Production and Development
+
+Use separate Discord applications and bot tokens for production and
+development. Never run both versions with the same `BOT_TOKEN`: both processes
+can receive the same interactions, race to respond, and change command
+registrations for the same application.
+
+Create a production `.env` for a bot that should work in one server:
+
+```dotenv
+BOT_TOKEN=<production-bot-token>
+DISCORD_GUILD_ID=<production-server-id>
+# Leave DISCORD_CHANNEL_NAME unset.
+```
+
+This registers commands only in that server and permits them in every channel.
+If the production bot should work across every server where it is installed,
+leave both `DISCORD_GUILD_ID` and `DISCORD_CHANNEL_NAME` unset to register its
+commands globally.
+
+Create a second Discord application named `Judge0 Discord Bot Dev`, invite it
+to the test server, and give its checkout a separate `.env`:
+
+```dotenv
+BOT_TOKEN=<development-bot-token>
+DISCORD_GUILD_ID=<test-server-id>
+DISCORD_CHANNEL_NAME=test-discord-bot
+```
+
+Development commands are registered immediately in the test server, and that
+instance rejects interactions outside the configured channel and its threads.
+
+Keep separate checkouts and `.env` files so deployments cannot overwrite each
+other:
+
+```text
+discord-bot-production/
+  .env
+discord-bot-development/
+  .env
+```
+
+Use different Compose project names when both instances run on the same host:
+
+```bash
+# Run from the production checkout.
+docker compose -p judge0-bot-production up --build -d
+
+# Run from the development checkout.
+docker compose -p judge0-bot-development up --build -d
+```
+
+If both bots are installed in the same Discord server, open
+**Server Settings > Integrations** and disable the production bot's commands in
+`#test-discord-bot`. Discord permits separate applications to expose commands
+with the same names.
+
+Both deployments use Judge0's credential-free preview service. It is
+rate-limited and has no production availability guarantee. Development traffic
+can affect production limits, especially when both deployments share an IP.
+Separate hosts reduce that interference but do not provide a service guarantee.
+
 Optional bot settings:
 
 ```dotenv
