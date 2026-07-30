@@ -25,7 +25,7 @@ Message Content or Server Members intents.
 
 ## Requirements
 
-- Python 3.10 or newer, or Docker
+- Python 3.14 and [uv](https://docs.astral.sh/uv/), or Docker
 - A Discord application and bot token
 
 Judge0 Discord Bot intentionally uses the SDK's credential-free preview
@@ -46,9 +46,8 @@ DISCORD_CHANNEL_NAME=test-discord-bot
 Then start the bot:
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'
-.venv/bin/python -m bot
+uv sync --locked
+uv run --locked judge0-discord-bot
 ```
 
 In `#test-discord-bot`, run `/info`, followed by:
@@ -82,7 +81,7 @@ the bot also need Use Application Commands.
 4. For instant command registration during setup, set your server ID as
    `DISCORD_GUILD_ID`. You can optionally restrict the bot to one channel with
    `DISCORD_CHANNEL_NAME`.
-5. Start the bot with `.venv/bin/python -m bot` or Docker Compose.
+5. Start the bot with `uv run --locked judge0-discord-bot` or Docker Compose.
 
 Remove `DISCORD_GUILD_ID` and `DISCORD_CHANNEL_NAME` for a public deployment.
 On the next start, commands are registered globally. Discord guild command
@@ -171,11 +170,15 @@ Stop it with `docker compose down`.
 ## Development
 
 ```bash
-python3 -m venv .venv
-.venv/bin/pip install -e '.[dev]'
-.venv/bin/ruff check .
-.venv/bin/pytest
+uv sync --locked
+uv run --locked ruff check .
+uv run --locked pytest
 ```
+
+The committed `.python-version` makes uv select the latest available Python
+3.14 patch release. Add runtime dependencies with `uv add PACKAGE`, or local
+development tools with `uv add --dev PACKAGE`; both commands update
+`pyproject.toml` and `uv.lock`.
 
 The Judge0 Python SDK is synchronous internally. Judge0 Discord Bot executes it on
 bounded worker threads so Discord's event loop remains responsive, and applies

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import discord
 import judge0
@@ -124,7 +124,7 @@ def submission_embed(
 
 
 def _format_uptime(started_at: datetime) -> str:
-    seconds = int((datetime.now(timezone.utc) - started_at).total_seconds())
+    seconds = int((datetime.now(UTC) - started_at).total_seconds())
     days, seconds = divmod(seconds, 86_400)
     hours, seconds = divmod(seconds, 3_600)
     minutes, seconds = divmod(seconds, 60)
@@ -178,7 +178,7 @@ class Judge0DiscordBot(discord.Client):
             timeout_seconds=settings.submission_timeout_seconds,
             max_concurrent=settings.max_concurrent_submissions,
         )
-        self.started_at = datetime.now(timezone.utc)
+        self.started_at = datetime.now(UTC)
         self.tree = RestrictedCommandTree(self)
         _register_commands(self)
 

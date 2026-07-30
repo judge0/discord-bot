@@ -1,32 +1,25 @@
 [build-system]
-requires = ["setuptools>=80"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.11.32,<0.12"]
+build-backend = "uv_build"
 
 [project]
 name = "judge0-discord-bot"
 version = "2.0.0"
 description = "Run code securely in Discord with Judge0"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 license = "MIT"
-dependencies = [
-    "discord.py==2.7.1",
-    "judge0==0.0.8",
-    "python-dotenv==1.2.2",
-]
+dependencies = ["discord.py==2.7.1", "judge0==0.0.8", "python-dotenv==1.2.2"]
 
-[project.optional-dependencies]
-dev = [
-    "pytest==9.1.1",
-    "pytest-asyncio==1.4.0",
-    "ruff==0.16.0",
-]
+[dependency-groups]
+dev = ["pytest==9.1.1", "pytest-asyncio==1.4.0", "ruff==0.16.0"]
 
 [project.scripts]
 judge0-discord-bot = "bot.__main__:main"
 
-[tool.setuptools.packages.find]
-include = ["bot*"]
+[tool.uv.build-backend]
+module-name = "bot"
+module-root = ""
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
@@ -34,7 +27,7 @@ testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 88
-target-version = "py310"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "UP"]

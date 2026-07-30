@@ -54,7 +54,7 @@ class Settings:
     submission_timeout_seconds: float = 30.0
 
     @classmethod
-    def from_env(cls) -> "Settings":
+    def from_env(cls) -> Settings:
         """Build settings from the process environment."""
         bot_token = os.getenv("BOT_TOKEN", "").strip()
         if not bot_token:

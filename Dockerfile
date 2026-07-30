@@ -1,17 +1,22 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /uvx /bin/
+
+ENV PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_NO_CACHE=1 \
+    UV_PYTHON_DOWNLOADS=never \
+    PATH="/app/.venv/bin:$PATH"
 
 WORKDIR /app
 
-COPY pyproject.toml README.md ./
+COPY pyproject.toml uv.lock README.md ./
 COPY bot ./bot
-RUN pip install --no-cache-dir . \
+RUN uv sync --locked --no-dev --no-editable \
     && useradd --create-home --uid 10001 judge0
 
 USER judge0
 
-CMD ["python", "-m", "bot"]
+CMD ["judge0-discord-bot"]
 
 LABEL maintainer="Herman Zvonimir Dosilovic <hermanz.dosilovic@gmail.com>"
